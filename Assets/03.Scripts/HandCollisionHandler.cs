@@ -7,6 +7,7 @@ public class HandCollisionHandler : MonoBehaviour
     public OVRSkeleton ovrSkeleton; // OVRSkeleton 참조
     public string wallTag = "Wall"; // 벽의 태그
     public float detectionRadius = 0.1f; // 손바닥 감지 반경
+    public float angleThreshold = 10f; // 손바닥 방향과 표면 법선 벡터의 허용 각도
 
     private Transform wristTransform; // 손목 Transform
     private Transform middleFingerTransform; // 중지 관절 Transform
@@ -75,6 +76,9 @@ public class HandCollisionHandler : MonoBehaviour
         // 손바닥 중심 위치 계산
         Vector3 palmPosition = (wristTransform.position + middleFingerTransform.position) / 2;
 
+        // 손바닥 방향 계산
+        Vector3 palmDirection = (middleFingerTransform.position - wristTransform.position).normalized;
+
         // 충돌 감지
         Collider[] hitColliders = Physics.OverlapSphere(palmPosition, detectionRadius);
 
@@ -85,12 +89,23 @@ public class HandCollisionHandler : MonoBehaviour
             Debug.Log($"Detected Collider: {hitCollider.name}, Tag: {hitCollider.tag}");
             if (hitCollider.CompareTag(wallTag))
             {
-                wallDetected = true;
-                if (!isTouchingWall)
+                // 충돌 면의 법선 벡터 가져오기
+                Vector3 collisionNormal = hitCollider.ClosestPoint(palmPosition) - palmPosition;
+                collisionNormal.Normalize();
+
+                // 손바닥 방향과 충돌 면 법선의 각도 비교
+                float angle = Vector3.Angle(-palmDirection, collisionNormal);
+                Debug.Log("손바닥과 벽 사이의 각도 : " + angle);
+        
+                if (angle < 100 && angle > 80)
                 {
-                    isTouchingWall = true;
-                    Debug.Log("Palm touched the wall!");
-                    OnPalmTouchWall(); // 충돌 이벤트 실행
+                    wallDetected = true;
+                    if (!isTouchingWall)
+                    {
+                        isTouchingWall = true;
+                        Debug.Log("Palm touched the wall!");
+                        OnPalmTouchWall(); // 충돌 이벤트 실행
+                    }
                 }
                 break;
             }
@@ -136,6 +151,13 @@ public class HandCollisionHandler : MonoBehaviour
             Vector3 palmPosition = (wristTransform.position + middleFingerTransform.position) / 2;
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(palmPosition, detectionRadius);
+
+            // 손바닥 방향 벡터 그리기
+            Vector3 palmDirection = (middleFingerTransform.position - wristTransform.position).normalized;
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(palmPosition, palmPosition + palmDirection * 0.1f); // 앞쪽 방향
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(palmPosition, palmPosition - palmDirection * 0.1f); // 뒤쪽 방향
         }
     }
     
