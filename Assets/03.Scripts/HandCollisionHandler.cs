@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using TMPro;
 public class HandCollisionHandler : MonoBehaviour
 {
     public OVRSkeleton ovrSkeleton; // OVRSkeleton 참조
@@ -18,6 +18,7 @@ public class HandCollisionHandler : MonoBehaviour
     public LineRenderer lineRenderer; // LineRenderer 참조
     public int circleSegments = 36; // 원을 구성하는 세그먼트 수
     public Color gizmoColor = Color.red; // 디버그 색상
+
 
     void Start()
     {
@@ -135,6 +136,7 @@ public class HandCollisionHandler : MonoBehaviour
     {
         // 손바닥이 벽에 닿았을 때 실행할 로직
         Debug.Log("Palm collision started.");
+        SoundManager.Instance.PlaySFX("WallHit");
     }
 
     private void OnPalmLeaveWall()
