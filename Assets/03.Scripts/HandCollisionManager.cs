@@ -50,7 +50,7 @@ public class HandCollisionManager : MonoBehaviour
     void StartMoving()
     {
         Debug.Log("한 층 내려가기 시작");
-        targetPosition = eye.transform.position + new Vector3(0, -1, 0); // 목표 위치 설정
+        targetPosition = eye.transform.position + new Vector3(0, -30, 0); // 목표 위치 설정
         isMoving = true; // 이동 활성화
     }
 
