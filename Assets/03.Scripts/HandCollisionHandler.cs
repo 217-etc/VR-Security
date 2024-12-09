@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+
 public class HandCollisionHandler : MonoBehaviour
 {
     public OVRSkeleton ovrSkeleton; // OVRSkeleton 참조
@@ -15,26 +16,32 @@ public class HandCollisionHandler : MonoBehaviour
     public bool IsTouchingWall => isTouchingWall;
     public bool canDetect = true;
 
-    public LineRenderer lineRenderer; // LineRenderer 참조
-    public int circleSegments = 36; // 원을 구성하는 세그먼트 수
-    public Color gizmoColor = Color.red; // 디버그 색상
-
+    public LineRenderer palmDirectionLineRenderer; // 손바닥의 반대 방향 벡터 LineRenderer
+    public LineRenderer normalDirectionLineRenderer; // 벽의 법선 벡터 LineRenderer
+    public Color palmDirectionColor = Color.green; // 손바닥 반대 방향 벡터 색상
+    public Color normalDirectionColor = Color.blue; // 벽의 법선 벡터 색상
 
     void Start()
     {
         StartCoroutine(InitializeSkeleton());
 
-        if (lineRenderer == null)
+        if (palmDirectionLineRenderer == null || normalDirectionLineRenderer == null)
         {
             Debug.LogError("LineRenderer is not assigned!");
         }
-        else
-        {
-            lineRenderer.positionCount = circleSegments + 1; // 원을 그리기 위해 필요한 점 개수
-            lineRenderer.startWidth = 0.01f;
-            lineRenderer.endWidth = 0.01f;
-            lineRenderer.loop = true; // 원을 닫음
-        }
+        // LineRenderer 생성
+        palmDirectionLineRenderer = new GameObject("PalmDirectionLine").AddComponent<LineRenderer>();
+        palmDirectionLineRenderer.startWidth = 0.01f;
+        palmDirectionLineRenderer.endWidth = 0.01f;
+        palmDirectionLineRenderer.material = new Material(Shader.Find("Unlit/Color"));
+        palmDirectionLineRenderer.material.color = palmDirectionColor;
+
+        normalDirectionLineRenderer = new GameObject("NormalDirectionLine").AddComponent<LineRenderer>();
+        normalDirectionLineRenderer.startWidth = 0.01f;
+        normalDirectionLineRenderer.endWidth = 0.01f;
+        normalDirectionLineRenderer.material = new Material(Shader.Find("Unlit/Color"));
+        normalDirectionLineRenderer.material.color = normalDirectionColor;
+
     }
 
     private IEnumerator InitializeSkeleton()
@@ -80,6 +87,13 @@ public class HandCollisionHandler : MonoBehaviour
         // 손바닥 방향 계산
         Vector3 palmDirection = (middleFingerTransform.position - wristTransform.position).normalized;
 
+        // 손바닥의 반대 방향
+        Vector3 oppositePalmDirection = -palmDirection;
+
+        // LineRenderer로 손바닥의 반대 방향 벡터 시각화
+        palmDirectionLineRenderer.SetPosition(0, palmPosition);
+        palmDirectionLineRenderer.SetPosition(1, palmPosition + oppositePalmDirection * 0.2f);
+
         // 충돌 감지
         Collider[] hitColliders = Physics.OverlapSphere(palmPosition, detectionRadius);
 
@@ -87,17 +101,19 @@ public class HandCollisionHandler : MonoBehaviour
 
         foreach (var hitCollider in hitColliders)
         {
-            Debug.Log($"Detected Collider: {hitCollider.name}, Tag: {hitCollider.tag}");
             if (hitCollider.CompareTag(wallTag))
             {
                 // 충돌 면의 법선 벡터 가져오기
-                Vector3 collisionNormal = hitCollider.ClosestPoint(palmPosition) - palmPosition;
-                collisionNormal.Normalize();
+                Vector3 collisionPoint = hitCollider.ClosestPoint(palmPosition);
+                Vector3 collisionNormal = (collisionPoint - palmPosition).normalized;
 
-                // 손바닥 방향과 충돌 면 법선의 각도 비교
-                float angle = Vector3.Angle(-palmDirection, collisionNormal);
+                float angle = Vector3.Angle(oppositePalmDirection, collisionNormal);
                 Debug.Log("손바닥과 벽 사이의 각도 : " + angle);
-        
+
+                // LineRenderer로 벽의 법선 벡터 시각화
+                normalDirectionLineRenderer.SetPosition(0, collisionPoint);
+                normalDirectionLineRenderer.SetPosition(1, collisionPoint + collisionNormal * 0.2f);
+
                 if (angle < 100 && angle > 80)
                 {
                     wallDetected = true;
@@ -105,64 +121,59 @@ public class HandCollisionHandler : MonoBehaviour
                     {
                         isTouchingWall = true;
                         Debug.Log("Palm touched the wall!");
-                        OnPalmTouchWall(); // 충돌 이벤트 실행
+                        OnPalmTouchWall();
                     }
                 }
                 break;
             }
         }
 
-        // 손바닥이 벽에서 떨어졌을 때
         if (!wallDetected && isTouchingWall)
         {
             isTouchingWall = false;
             Debug.Log("Palm left the wall!");
-            OnPalmLeaveWall(); // 벽에서 벗어나는 이벤트 실행
+            OnPalmLeaveWall();
         }
-
-        // 원을 구성하는 점 계산
-        Vector3[] circlePoints = new Vector3[circleSegments + 1];
-        for (int i = 0; i <= circleSegments; i++)
-        {
-            float angle = i * 360f / circleSegments * Mathf.Deg2Rad; // 각도 계산
-            circlePoints[i] = palmPosition + new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * detectionRadius;
-        }
-
-        // LineRenderer로 점 설정
-        lineRenderer.SetPositions(circlePoints);
     }
 
     private void OnPalmTouchWall()
     {
-        // 손바닥이 벽에 닿았을 때 실행할 로직
         Debug.Log("Palm collision started.");
         SoundManager.Instance.PlaySFX("WallHit");
     }
 
     private void OnPalmLeaveWall()
     {
-        // 손바닥이 벽에서 벗어났을 때 실행할 로직
         Debug.Log("Palm collision ended.");
     }
 
     void OnDrawGizmos()
     {
-        // 손바닥 감지 반경 시각화
         if (wristTransform != null && middleFingerTransform != null)
         {
             Vector3 palmPosition = (wristTransform.position + middleFingerTransform.position) / 2;
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(palmPosition, detectionRadius);
-
-            // 손바닥 방향 벡터 그리기
             Vector3 palmDirection = (middleFingerTransform.position - wristTransform.position).normalized;
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(palmPosition, palmPosition + palmDirection * 0.1f); // 앞쪽 방향
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLine(palmPosition, palmPosition - palmDirection * 0.1f); // 뒤쪽 방향
+            Vector3 oppositePalmDirection = -palmDirection;
+
+            // 손바닥의 반대 방향 벡터 (녹색)
+            Gizmos.color = palmDirectionColor;
+            Gizmos.DrawLine(palmPosition, palmPosition + oppositePalmDirection * 0.2f);
+
+            // 벽의 법선 벡터 (파란색)
+            Collider[] hitColliders = Physics.OverlapSphere(palmPosition, detectionRadius);
+            foreach (var hitCollider in hitColliders)
+            {
+                if (hitCollider.CompareTag(wallTag))
+                {
+                    Vector3 collisionPoint = hitCollider.ClosestPoint(palmPosition);
+                    Vector3 collisionNormal = (collisionPoint - palmPosition).normalized;
+
+                    Gizmos.color = normalDirectionColor;
+                    Gizmos.DrawLine(collisionPoint, collisionPoint + collisionNormal * 0.2f);
+                }
+            }
         }
     }
-    
 
     public void StartMove()
     {
@@ -174,5 +185,4 @@ public class HandCollisionHandler : MonoBehaviour
     {
         canDetect = true;
     }
-
 }
