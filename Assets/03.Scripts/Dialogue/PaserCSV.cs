@@ -1,7 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Networking;
 
 
 public class DialogueStructure
@@ -24,12 +25,12 @@ public class PaserCSV : MonoBehaviour
 
         if (csvData == null)
         {
-            Debug.Log(_CSVFileName + " 이름의 csv file을 찾을 수 없음.");
+            Debug.Log("csv file을 찾을 수 없음.");
             return dictionary;
         }
 
         //엔터를 기준으로 줄 나누기
-        string[] datas = csvData.text.Split('\n');
+        string[] datas = csvData.Split('\n');
         //헤더 값 저장하기
         string[] headers = datas[5].Split(',');
         //7번째 줄부터 읽어오기(1~5번째 줄은 설명, 6번째 줄은 헤더)
