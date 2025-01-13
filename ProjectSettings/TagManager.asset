@@ -10,6 +10,8 @@ TagManager:
   - LocoButton
   - LocoText
   - Wall
+  - RoomLight
+  - Screw
   layers:
   - Default
   - TransparentFX
