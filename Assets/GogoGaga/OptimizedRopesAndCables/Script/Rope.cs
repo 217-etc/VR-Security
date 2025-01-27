@@ -33,10 +33,10 @@ namespace GogoGaga.OptimizedRopesAndCables
         public float stiffness = 350f;
 
         [Tooltip("0 is no damping, 50 is a lot")]
-        public float damping = 30f;
+        public float damping = 15f;
 
         [Tooltip("How long is the rope, it will hang more or less from starting point to end point depending on this value")]
-        public float ropeLength = 1;
+        public float ropeLength = 15;
 
         [Tooltip("The Rope width set at start (changing this value during run time will produce no effect)")]
         public float ropeWidth = 0.1f;
@@ -71,12 +71,8 @@ namespace GogoGaga.OptimizedRopesAndCables
         private float prevstiffness;
         private float prevDampness;
         private float prevRopeLength;
-
-        //수정
-        //private void AdjustLinePoints;
-        //private void AdjustRopeSettings;
-
-
+        
+        
         public bool IsPrefab => gameObject.scene.rootCount == 0;
         
         private void Start()
@@ -119,27 +115,6 @@ namespace GogoGaga.OptimizedRopesAndCables
             lineRenderer.endWidth = ropeWidth;
         }
 
-        //수정
-        private void AdjustLinePoints()
-        {
-            // 로프 길이에 따라 세그먼트 개수 조정
-            int adjustedLinePoints = Mathf.Clamp(Mathf.RoundToInt(ropeLength * 2), 2, 100); // 길이에 비례, 최소 2, 최대 100
-            if (adjustedLinePoints != linePoints)
-            {
-                linePoints = adjustedLinePoints;
-                lineRenderer.positionCount = linePoints + 1;
-            }
-        }
-        private void AdjustRopeSettings()
-        {
-            // Rope Stiffness 동적 조정: 로프 길이에 비례 (기본값을 기준으로 비례값 설정)
-            stiffness = Mathf.Lerp(100f, 500f, ropeLength / 20f); // 20은 최대 예상 길이, 조정 가능
-
-            // Rope Dampness 동적 조정: 로프 길이에 반비례
-            damping = Mathf.Lerp(5f, 20f, 1f - (ropeLength / 20f)); // 20은 최대 예상 길이
-        }
-
-
         private void Update()
         {
             if (IsPrefab)
@@ -149,11 +124,6 @@ namespace GogoGaga.OptimizedRopesAndCables
             
             if (AreEndPointsValid())
             {
-                //수정
-                AdjustLinePoints();
-                AdjustRopeSettings();
-                ropeLength = Vector3.Distance(startPoint.position, endPoint.position);
-
                 SetSplinePoint();
 
                 if (!Application.isPlaying && (IsPointsMoved() || IsRopeSettingsChanged()))
@@ -225,8 +195,7 @@ namespace GogoGaga.OptimizedRopesAndCables
 
         private Vector3 GetRationalBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, float t, float w0, float w1, float w2)
         {
-            //scale each point by its weight (can probably remove w0 and w2 if the midpoint is the only
-            //able weight)
+            //scale each point by its weight (can probably remove w0 and w2 if the midpoint is the only adjustable weight)
             Vector3 wp0 = w0 * p0;
             Vector3 wp1 = w1 * p1;
             Vector3 wp2 = w2 * p2;
