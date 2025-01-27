@@ -14,17 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetDeviceTypes: 0100000002000000030000000400000005000000
   allowOptional3DofHeadTracking: 0
-<<<<<<< HEAD
   handTrackingSupport: 1
-  handTrackingFrequency: 1
-  handTrackingVersion: 0
+  handTrackingFrequency: 2
+  handTrackingVersion: 2
   anchorSupport: 1
-=======
-  handTrackingSupport: 0
-  handTrackingFrequency: 0
-  handTrackingVersion: 0
-  anchorSupport: 0
->>>>>>> Jihye2
   sharedAnchorSupport: 0
   renderModelSupport: 0
   trackedKeyboardSupport: 0
@@ -33,13 +26,8 @@ MonoBehaviour:
   eyeTrackingSupport: 0
   virtualKeyboardSupport: 0
   colocationSessionSupport: 0
-<<<<<<< HEAD
   sceneSupport: 2
   boundaryVisibilitySupport: 2
-=======
-  sceneSupport: 0
-  boundaryVisibilitySupport: 0
->>>>>>> Jihye2
   disableBackups: 1
   enableNSCConfig: 1
   securityXmlPath: 
@@ -50,8 +38,8 @@ MonoBehaviour:
   requiresSystemKeyboard: 0
   experimentalFeaturesEnabled: 0
   insightPassthroughEnabled: 0
-  _insightPassthroughSupport: 0
+  _insightPassthroughSupport: 1
   _processorFavor: 0
   systemSplashScreen: {fileID: 0}
   systemSplashScreenType: 0
-  _systemLoadingScreenBackground: 0
+  _systemLoadingScreenBackground: 1
