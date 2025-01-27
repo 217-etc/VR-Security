@@ -17,6 +17,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/01.Scene/Start.unity
     guid: cea21879108e6604e8fec0f32deb8ff6
+  - enabled: 1
+    path: Assets/01.Scene/StageSelect.unity
+    guid: 86ea56340ea741b4f9f7d425dcbd44bf
+  - enabled: 1
+    path: Assets/01.Scene/Stage1Tutorial.unity
+    guid: 99ce8a97a96932144a37c125748fc747
+  - enabled: 1
+    path: Assets/01.Scene/Stage2Select.unity
+    guid: 378a3236c300a634cadc1f3b2b0d98fe
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: ae5a232ed59bd0c4190f9b4669d2238b,
       type: 2}

@@ -16,31 +16,31 @@ public class HandCollisionHandler : MonoBehaviour
     public bool IsTouchingWall => isTouchingWall;
     public bool canDetect = true;
 
-    public LineRenderer palmDirectionLineRenderer; // 손바닥의 반대 방향 벡터 LineRenderer
-    public LineRenderer normalDirectionLineRenderer; // 벽의 법선 벡터 LineRenderer
-    public Color palmDirectionColor = Color.green; // 손바닥 반대 방향 벡터 색상
-    public Color normalDirectionColor = Color.blue; // 벽의 법선 벡터 색상
+    //public LineRenderer palmDirectionLineRenderer; // 손바닥의 반대 방향 벡터 LineRenderer
+    //public LineRenderer normalDirectionLineRenderer; // 벽의 법선 벡터 LineRenderer
+    //public Color palmDirectionColor = Color.green; // 손바닥 반대 방향 벡터 색상
+    //public Color normalDirectionColor = Color.blue; // 벽의 법선 벡터 색상
 
     void Start()
     {
         StartCoroutine(InitializeSkeleton());
 
-        if (palmDirectionLineRenderer == null || normalDirectionLineRenderer == null)
-        {
-            Debug.LogError("LineRenderer is not assigned!");
-        }
-        // LineRenderer 생성
-        palmDirectionLineRenderer = new GameObject("PalmDirectionLine").AddComponent<LineRenderer>();
-        palmDirectionLineRenderer.startWidth = 0.01f;
-        palmDirectionLineRenderer.endWidth = 0.01f;
-        palmDirectionLineRenderer.material = new Material(Shader.Find("Unlit/Color"));
-        palmDirectionLineRenderer.material.color = palmDirectionColor;
+        //if (palmDirectionLineRenderer == null || normalDirectionLineRenderer == null)
+        //{
+        //    Debug.LogError("LineRenderer is not assigned!");
+        //}
+        //// LineRenderer 생성
+        //palmDirectionLineRenderer = new GameObject("PalmDirectionLine").AddComponent<LineRenderer>();
+        //palmDirectionLineRenderer.startWidth = 0.01f;
+        //palmDirectionLineRenderer.endWidth = 0.01f;
+        //palmDirectionLineRenderer.material = new Material(Shader.Find("Unlit/Color"));
+        //palmDirectionLineRenderer.material.color = palmDirectionColor;
 
-        normalDirectionLineRenderer = new GameObject("NormalDirectionLine").AddComponent<LineRenderer>();
-        normalDirectionLineRenderer.startWidth = 0.01f;
-        normalDirectionLineRenderer.endWidth = 0.01f;
-        normalDirectionLineRenderer.material = new Material(Shader.Find("Unlit/Color"));
-        normalDirectionLineRenderer.material.color = normalDirectionColor;
+        //normalDirectionLineRenderer = new GameObject("NormalDirectionLine").AddComponent<LineRenderer>();
+        //normalDirectionLineRenderer.startWidth = 0.01f;
+        //normalDirectionLineRenderer.endWidth = 0.01f;
+        //normalDirectionLineRenderer.material = new Material(Shader.Find("Unlit/Color"));
+        //normalDirectionLineRenderer.material.color = normalDirectionColor;
 
     }
 
@@ -90,9 +90,9 @@ public class HandCollisionHandler : MonoBehaviour
         // 손바닥의 반대 방향
         Vector3 oppositePalmDirection = -palmDirection;
 
-        // LineRenderer로 손바닥의 반대 방향 벡터 시각화
-        palmDirectionLineRenderer.SetPosition(0, palmPosition);
-        palmDirectionLineRenderer.SetPosition(1, palmPosition + oppositePalmDirection * 0.2f);
+        //// LineRenderer로 손바닥의 반대 방향 벡터 시각화
+        //palmDirectionLineRenderer.SetPosition(0, palmPosition);
+        //palmDirectionLineRenderer.SetPosition(1, palmPosition + oppositePalmDirection * 0.2f);
 
         // 충돌 감지
         Collider[] hitColliders = Physics.OverlapSphere(palmPosition, detectionRadius);
@@ -110,9 +110,9 @@ public class HandCollisionHandler : MonoBehaviour
                 float angle = Vector3.Angle(oppositePalmDirection, collisionNormal);
                 Debug.Log("손바닥과 벽 사이의 각도 : " + angle);
 
-                // LineRenderer로 벽의 법선 벡터 시각화
-                normalDirectionLineRenderer.SetPosition(0, collisionPoint);
-                normalDirectionLineRenderer.SetPosition(1, collisionPoint + collisionNormal * 0.2f);
+                //// LineRenderer로 벽의 법선 벡터 시각화
+                //normalDirectionLineRenderer.SetPosition(0, collisionPoint);
+                //normalDirectionLineRenderer.SetPosition(1, collisionPoint + collisionNormal * 0.2f);
 
                 if (angle < 100 && angle > 80)
                 {
@@ -155,9 +155,9 @@ public class HandCollisionHandler : MonoBehaviour
             Vector3 palmDirection = (middleFingerTransform.position - wristTransform.position).normalized;
             Vector3 oppositePalmDirection = -palmDirection;
 
-            // 손바닥의 반대 방향 벡터 (녹색)
-            Gizmos.color = palmDirectionColor;
-            Gizmos.DrawLine(palmPosition, palmPosition + oppositePalmDirection * 0.2f);
+            //// 손바닥의 반대 방향 벡터 (녹색)
+            //Gizmos.color = palmDirectionColor;
+            //Gizmos.DrawLine(palmPosition, palmPosition + oppositePalmDirection * 0.2f);
 
             // 벽의 법선 벡터 (파란색)
             Collider[] hitColliders = Physics.OverlapSphere(palmPosition, detectionRadius);
@@ -168,8 +168,8 @@ public class HandCollisionHandler : MonoBehaviour
                     Vector3 collisionPoint = hitCollider.ClosestPoint(palmPosition);
                     Vector3 collisionNormal = (collisionPoint - palmPosition).normalized;
 
-                    Gizmos.color = normalDirectionColor;
-                    Gizmos.DrawLine(collisionPoint, collisionPoint + collisionNormal * 0.2f);
+                    //Gizmos.color = normalDirectionColor;
+                    //Gizmos.DrawLine(collisionPoint, collisionPoint + collisionNormal * 0.2f);
                 }
             }
         }
