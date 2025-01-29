@@ -47,6 +47,7 @@ public class WindowAutoMove : MonoBehaviour
         }
 
         transform.position = targetPosition; // 이동이 끝나면 최종 위치 보정
+        LockWindow(); // 창문 고정
 
         //이동이 끝난뒤 창문의 잡기기능 아예 삭제
         Destroy(HandMoveObject);
