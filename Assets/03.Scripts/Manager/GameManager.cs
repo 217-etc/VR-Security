@@ -23,6 +23,7 @@ public class GameManager : Singleton<GameManager>
 
         //다 불러와지면 게임 상태 -> Ready
         gameState = GameState.Ready;
+        Debug.Log("Game Ready");
     }
 
     void Update()
