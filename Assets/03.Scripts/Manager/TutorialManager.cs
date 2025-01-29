@@ -1,104 +1,244 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class TutorialManager : MonoBehaviour
 {
-    public OVRHand ovrHand; // OVRHand ÄÄÆ÷³ÍÆ® ÂüÁ¶
+    public OVRHand ovrHand; // OVRHand ì°¸ì¡°
+    public OVRSkeleton ovrSkeleton; // OVRSkeleton ì°¸ì¡°
+    public GameObject debugSpherePrefab;
 
-    private bool detectStart = false; // ÇÃ·¹ÀÌ¾îÀÇ ¼Õ °¨Áö ½ÃÀÛ
-    private bool isFist = false; // ÇöÀç ÁÖ¸Ô »óÅÂ
-    private bool isFirstPalm = false; // Ã³À½ ¼Õ¹Ù´ÚÀ» ÆîÃÆ´ÂÁö
-    private const float pinchThreshold = 0.4f; // ÇÉÄª °­µµ ÀÓ°è°ª
-    private const float palmThreshold = 0.05f;
+    private Dictionary<string, Transform> boneTransforms = new Dictionary<string, Transform>();
+    private Dictionary<string, GameObject> debugSpheres = new Dictionary<string, GameObject>();
+
+    private bool detectStart = false; // ì† ê°ì§€ ì‹œì‘
+    private bool isFist = false; // í˜„ì¬ ì£¼ë¨¹ ìƒíƒœ
+    private bool isFirstPalm = false; // ì²˜ìŒ ì†ë°”ë‹¥ì„ í¼ì³¤ëŠ”ì§€
+    private const float angleThreshold = 120f; // ì†ê°€ë½ì´ êµ¬ë¶€ëŸ¬ì¡Œë‹¤ê³  íŒë‹¨í•˜ëŠ” ê°ë„
+    private const float thumbAngleThreshold = 25f; // ì—„ì§€ ì†ê°€ë½ì´ êµ¬ë¶€ëŸ¬ì¡Œë‹¤ê³  íŒë‹¨í•˜ëŠ” ê°ë„
+    private const float palmThreshold = 40f; // ì†ê°€ë½ í¼ì³ì¡Œë‹¤ê³  íŒë‹¨í•˜ëŠ” ê°ë„
     private int fistCnt = 0;
+
+    private Transform wristTransform; // ì†ëª© Transform
 
     void Start()
     {
-        //3ÃÊ µÚºÎÅÍ ¼Õ °¨Áö ½ÃÀÛ
-        Invoke("DetectStart", 3f);
+        StartCoroutine(InitializeBones());
     }
 
     void DetectStart()
     {
         detectStart = true;
-        Debug.LogWarning("°¨Áö ½ÃÀÛ");
+        Debug.LogWarning("ê°ì§€ ì‹œì‘");
+    }
+
+    private IEnumerator InitializeBones()
+    {
+        while (ovrSkeleton.Bones == null || ovrSkeleton.Bones.Count == 0)
+        {
+            yield return null;
+        }
+
+        // ì†ê°€ë½ ì´ë¦„ ë¦¬ìŠ¤íŠ¸ (Pinky ëŒ€ì‹  Little ì‚¬ìš©)
+        string[] fingerNames = { "Thumb", "Index", "Middle", "Ring", "Little" };
+
+        foreach (var bone in ovrSkeleton.Bones)
+        {
+            string boneName = bone.Transform.name; // Transformì˜ ì‹¤ì œ ì´ë¦„ ê°€ì ¸ì˜¤ê¸°
+
+            foreach (var finger in fingerNames)
+            {
+                if (boneName == $"XRHand_{finger}Proximal") // Base ê´€ì ˆ
+                {
+                    boneTransforms[$"{finger}_Base"] = bone.Transform;
+                }
+                else if (boneName == $"XRHand_{finger}Tip") // Tip ì†ë
+                {
+                    boneTransforms[$"{finger}_Tip"] = bone.Transform;
+                }
+                else if (boneName == "XRHand_Wrist") // ì†ëª©
+                {
+                    wristTransform = bone.Transform;
+                }
+            }
+        }
+
+        // ë””ë²„ê·¸ Sphere ìƒì„± ë° ë§¤í•‘
+        foreach (var key in boneTransforms.Keys)
+        {
+            Transform boneTransform = boneTransforms[key];
+
+            if (boneTransform != null)
+            {
+                GameObject debugSphere = Instantiate(debugSpherePrefab, boneTransform.position, Quaternion.identity);
+                debugSphere.transform.localScale = Vector3.one * 0.02f; // Sphere í¬ê¸° ì¡°ì •
+                debugSpheres[key] = debugSphere;
+            }
+        }
+
+        Debug.Log("ì†ê°€ë½ ê´€ì ˆ ë° ë””ë²„ê·¸ Sphere ì´ˆê¸°í™” ì™„ë£Œ!");
+
+        Invoke("DetectStart", 3f);
     }
 
     void Update()
     {
-        // ¼Õ°¡¶ô »óÅÂ¸¦ °¨Áö
-        bool isIndexPinching = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Index) > pinchThreshold;
-        bool isMiddlePinching = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Middle) > pinchThreshold;
-        bool isRingPinching = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Ring) > pinchThreshold;
-        bool isPinkyPinching = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Pinky) > pinchThreshold;
+        if (!detectStart || boneTransforms.Count == 0 || wristTransform == null) return;
 
-        bool isThumbPalm = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Thumb) < palmThreshold;
-        bool isIndexPalm = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Index) < palmThreshold;
-        bool isMiddlePalm = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Middle) < palmThreshold;
-        bool isRingPalm = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Ring) < palmThreshold;
-        bool isPinkyPalm = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Pinky) < palmThreshold;
-
-        if (detectStart)
+        // ë””ë²„ê·¸ Sphere ìœ„ì¹˜ ì—…ë°ì´íŠ¸ (ì†ê°€ë½ ê´€ì ˆì„ ë”°ë¼ê°)
+        foreach (var key in boneTransforms.Keys)
         {
-            if (isThumbPalm && isIndexPalm && isMiddlePalm && isRingPalm && isPinkyPalm)
+            if (debugSpheres.ContainsKey(key))
             {
-                if (!isFirstPalm)
-                {
-                    isFirstPalm = true;
-                    Debug.LogWarning("Ã³À½ ¼Õ¹Ù´ÚÀ» ÆîÃÆ½À´Ï´Ù.");
-                    OnHandOpen();
-                    return;
-                }
-                else
-                {
-                    if (isFist)
-                    {
-                        Debug.LogWarning("´Ù½Ã ¼Õ¹Ù´ÚÀ» ÆîÃÆ½À´Ï´Ù.");
-                        isFist = false;
-                        OnHandOpen();
-                        return;
-                    }
-                }
+                debugSpheres[key].transform.position = boneTransforms[key].position;
             }
+        }
 
-            // ¸ğµç ¼Õ°¡¶ôÀÌ ÀÏÁ¤ °­µµ ÀÌ»ó ÇÉÄª »óÅÂ¶ó¸é ÁÖ¸ÔÀ¸·Î °£ÁÖ
-            if (isFirstPalm && isIndexPinching && isMiddlePinching && isRingPinching && isPinkyPinching)
+        // ì†ê°€ë½ êµ¬ë¶€ëŸ¬ì§ ê°ì§€ (ê°ë„ ê¸°ë°˜)
+        bool isThumbCurled = IsFingerCurled("Thumb");
+        bool isIndexCurled = IsFingerCurled("Index");
+        bool isMiddleCurled = IsFingerCurled("Middle");
+        bool isRingCurled = IsFingerCurled("Ring");
+        bool isLittleCurled = IsFingerCurled("Little");
+
+        // ì†ê°€ë½ í¼ì³ì§ ê°ì§€
+        bool isThumbOpened = IsFingerOpened("Thumb");
+        bool isIndexOpened = IsFingerOpened("Index");
+        bool isMiddleOpened = IsFingerOpened("Middle");
+        bool isRingOpened = IsFingerOpened("Ring");
+        bool isLittleOpened = IsFingerOpened("Little");
+
+        // ì†ì„ ì²˜ìŒ íˆì„ ë•Œ ê°ì§€
+        if (isThumbOpened && isIndexOpened && isMiddleOpened && isRingOpened && isLittleOpened)
+        {
+            if (!isFirstPalm)
             {
-                if (!isFist) // Ã³À½ ÁÖ¸Ô »óÅÂ·Î º¯°æµÉ ¶§
+                isFirstPalm = true;
+                Debug.LogWarning("ì²˜ìŒ ì†ë°”ë‹¥ì„ í¼ì³¤ìŠµë‹ˆë‹¤.");
+                ChangeJointColorGreen();
+                OnHandOpen();
+                return;
+            }
+            else
+            {
+                if (isFist)
                 {
-                    isFist = true;
-                    fistCnt++;
-                    Debug.LogWarning($"¼ÕÀÌ ÁÖ¸ÔÀ» Áã¾ú½À´Ï´Ù! ÁÖ¸Ô Áå È½¼ö : {fistCnt}");
-                    OnFist(); // ÁÖ¸Ô µ¿ÀÛ ½ÇÇà
+                    Debug.LogWarning("ë‹¤ì‹œ ì†ë°”ë‹¥ì„ í¼ì³¤ìŠµë‹ˆë‹¤.");
+                    ChangeJointColorGreen();
+                    isFist = false;
+                    OnHandOpen();
                     return;
                 }
             }
         }
 
+        // ëª¨ë“  ì†ê°€ë½ì´ êµ¬ë¶€ëŸ¬ì ¸ ìˆìœ¼ë©´ ì£¼ë¨¹ìœ¼ë¡œ íŒë‹¨
+        if (isFirstPalm && isIndexCurled && isMiddleCurled && isRingCurled && isLittleCurled)
+        {
+            if (!isFist) // ì²˜ìŒ ì£¼ë¨¹ ìƒíƒœë¡œ ë³€ê²½ë  ë•Œ
+            {
+                isFist = true;
+                fistCnt++;
+                Debug.LogWarning($"ì†ì´ ì£¼ë¨¹ì„ ì¥ì—ˆìŠµë‹ˆë‹¤! ì£¼ë¨¹ ì¥” íšŸìˆ˜: {fistCnt}");
+                ChangeJointColorRed();
+                OnFist();
+                return;
+            }
+        }
+    }
 
-        
-        //else
-        //{
-        //    if (isFist) // Ã³À½ ¼ÕÀÌ ÆìÁú ¶§
-        //    {
-        //        isFist = false;
-        //        Debug.Log("¼ÕÀÌ ÆìÁ³½À´Ï´Ù!");
-        //        OnHandOpen(); // ¼Õ Æì±â µ¿ÀÛ ½ÇÇà
-        //    }
-        //}
+    // ì†ê°€ë½ì´ êµ¬ë¶€ëŸ¬ì¡ŒëŠ”ì§€ íŒë‹¨í•˜ëŠ” í•¨ìˆ˜ (ê°ë„ ê¸°ë°˜)
+    private bool IsFingerCurled(string finger)
+    {
+        string baseKey = $"{finger}_Base";
+        string tipKey = $"{finger}_Tip";
+
+        if (!boneTransforms.ContainsKey(baseKey) || !boneTransforms.ContainsKey(tipKey) || wristTransform == null)
+            return false;
+
+        Transform baseJoint = boneTransforms[baseKey];
+        Transform tipJoint = boneTransforms[tipKey];
+
+        // ì†ê°€ë½ ë²¡í„°
+        Vector3 fingerVector = (tipJoint.position - baseJoint.position).normalized;
+
+        // ì†ë°”ë‹¥ ë²¡í„° (ì†ëª© â†’ ì¤‘ì§€ Base ë°©í–¥)
+        Transform middleBase = boneTransforms.ContainsKey("Middle_Base") ? boneTransforms["Middle_Base"] : null;
+        if (middleBase == null) return false;
+        Vector3 palmVector = (middleBase.position - wristTransform.position).normalized;
+
+        // ì†ê°€ë½ê³¼ ì†ë°”ë‹¥ ë²¡í„° ê°„ì˜ ê°ë„
+        float angle = Vector3.Angle(fingerVector, palmVector);
+
+        if(finger == "Thumb")
+        {
+            //Debug.Log($"{finger} :  {angle}");
+            return angle > thumbAngleThreshold;
+        }
+        else
+        {
+            //Debug.Log($"{finger} :  {angle}");
+            return angle > angleThreshold;
+        }
+    }
+
+    private bool IsFingerOpened(string finger)
+    {
+        string baseKey = $"{finger}_Base";
+        string tipKey = $"{finger}_Tip";
+
+        if (!boneTransforms.ContainsKey(baseKey) || !boneTransforms.ContainsKey(tipKey) || wristTransform == null)
+            return false;
+
+        Transform baseJoint = boneTransforms[baseKey];
+        Transform tipJoint = boneTransforms[tipKey];
+
+        // ì†ê°€ë½ ë²¡í„°
+        Vector3 fingerVector = (tipJoint.position - baseJoint.position).normalized;
+
+        // ì†ë°”ë‹¥ ë²¡í„° (ì†ëª© â†’ ì¤‘ì§€ Base ë°©í–¥)
+        Transform middleBase = boneTransforms.ContainsKey("Middle_Base") ? boneTransforms["Middle_Base"] : null;
+        if (middleBase == null) return false;
+        Vector3 palmVector = (middleBase.position - wristTransform.position).normalized;
+
+        // ì†ê°€ë½ê³¼ ì†ë°”ë‹¥ ë²¡í„° ê°„ì˜ ê°ë„
+        float angle = Vector3.Angle(fingerVector, palmVector);
+
+        return angle < palmThreshold;
     }
 
     private void OnFist()
     {
-        // ÁÖ¸Ô Áã¾úÀ» ¶§ ½ÇÇàÇÒ µ¿ÀÛ
-        Debug.LogWarning("ÁÖ¸Ô µ¿ÀÛ ½ÇÇà Áß...");
+        Debug.LogWarning("ì£¼ë¨¹ ë™ì‘ ì‹¤í–‰ ì¤‘...");
     }
 
     private void OnHandOpen()
     {
-        // ¼ÕÀ» ÆñÀ» ¶§ ½ÇÇàÇÒ µ¿ÀÛ
-        Debug.LogWarning("¼Õ ÆîÄ§ µ¿ÀÛ ½ÇÇà Áß...");
+        Debug.LogWarning("ì† í¼ì¹¨ ë™ì‘ ì‹¤í–‰ ì¤‘...");
+    }
+
+    private void ChangeJointColorGreen()
+    {
+        foreach(GameObject sphere in debugSpheres.Values)
+        {
+            Renderer sphereRenderer = sphere.GetComponent<Renderer>();
+            if (sphereRenderer != null)
+            {
+                sphereRenderer.material.color = Color.green;
+            }
+        }  
+    }
+
+    private void ChangeJointColorRed()
+    {
+        foreach (GameObject sphere in debugSpheres.Values)
+        {
+            Renderer sphereRenderer = sphere.GetComponent<Renderer>();
+            if (sphereRenderer != null)
+            {
+                sphereRenderer.material.color = Color.red;
+            }
+        }
     }
 }
+
