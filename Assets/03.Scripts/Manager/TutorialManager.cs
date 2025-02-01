@@ -210,7 +210,6 @@ public class TutorialManager : MonoBehaviour
     private void OnFist()
     {
         Debug.LogWarning("주먹 동작 실행 중...");
-        //테스트 문구 DialogueManager.Instance.StartDialogue("Dialogue_A001");
     }
 
     private void OnHandOpen()

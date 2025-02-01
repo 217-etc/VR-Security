@@ -21,22 +21,41 @@ public class DialogueStructure
 public class DialogueManager : Singleton<DialogueManager>
 {
     private const string GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1cI32XyRtkvbBQhcp7X-bqHLbGvLRB0LizHmtGTCLAZA/export?format=csv&gid=0";
+    private const string TTS_URL = "https://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=";
     //딕셔너리 생성하기
     public Dictionary<string, DialogueStructure> dialougeDictionary = new Dictionary<string, DialogueStructure>();
     public GameObject noticeUI; // 안내문 UI
-    private Animator _animator;
+    private Animator _animator; // 안내문 Animator
+    private AudioSource _audioSource;
 
     public bool isDialogueActive = false;
     public float autoDialgoueDuration = 2f;
     private string _currentKey;
     private int _currentIndex = 0;
     public Action ShowNext;
-    private bool _waitingForAction;
+    private bool _waitingForAction = true;
     
     async void Start()
     {
         await ParseCSV();
         _animator = noticeUI.GetComponentInParent<Animator>();
+        _audioSource = GetComponent<AudioSource>();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            DialogueManager.Instance.StartDialogue("Dialogue_A001");
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            if( DialogueManager.Instance.ShowNext != null)
+            {
+                Debug.LogWarning("플레이어가 행동을 함");
+                DialogueManager.Instance.ShowNext?.Invoke();
+            }
+        }
     }
     public async Task ParseCSV()
     {
@@ -141,36 +160,38 @@ public class DialogueManager : Singleton<DialogueManager>
 
     IEnumerator ShowDialogue()
     {
-        while (isDialogueActive)
-        {
-            DialogueStructure dialogueStructure = dialougeDictionary[_currentKey];
-            
-            // 출력할 다음 대사가 존재한다면
-            if (_currentIndex < dialogueStructure.dialogues.Length)
-            {
-                // UI 텍스트 교체
-                TextMeshProUGUI textUI = noticeUI.GetComponentInChildren<TextMeshProUGUI>();
-                textUI.text = dialogueStructure.dialogues[_currentIndex].text;
+        if (!isDialogueActive) yield break;
+        DialogueStructure dialogueStructure = dialougeDictionary[_currentKey];
 
-                // 타입이 auto면
-                if (dialogueStructure.dialogues[_currentIndex].display_behaviour == "auto")
-                {
-                    yield return new WaitForSeconds(autoDialgoueDuration);
-                    ShowNextDialogue();
-                }
-                else
-                {
-                    // act 타입이면, 플레이어가 act할 때까지 대기
-                    ShowNext += ShowNextDialogue;
-                    _waitingForAction = true;
-                    yield return new WaitUntil(() => !_waitingForAction);
-                }
-            }
-            else // 다음 대사가 없다면
+        // 출력할 다음 대사가 존재한다면
+        if (_currentIndex < dialogueStructure.dialogues.Length)
+        {
+            // UI 텍스트 교체
+            TextMeshProUGUI textUI = noticeUI.GetComponentInChildren<TextMeshProUGUI>();
+            string text = dialogueStructure.dialogues[_currentIndex].text;
+            textUI.text = text;
+            StartCoroutine(PlayTTS(ChangeStringForTTS(text)));
+
+            Debug.LogWarning($"대사의 행동 타입 : {dialogueStructure.dialogues[_currentIndex].display_behaviour}");
+            // 타입이 auto면
+            if (dialogueStructure.dialogues[_currentIndex].display_behaviour == "auto")
             {
-                // 대사 출력 종료
-                EndDialogue();
+                yield return new WaitForSeconds(autoDialgoueDuration);
             }
+            else
+            {
+                // act 타입이면, 플레이어가 act할 때까지 대기
+                ShowNext += OnPlayerAct;
+                _waitingForAction = true;
+                yield return new WaitUntil(() => !_waitingForAction);
+                Debug.LogWarning("플레이어가 행동을 함!");
+            }
+            ShowNextDialogue();
+        }
+        else // 다음 대사가 없다면
+        {
+            // 대사 출력 종료
+            EndDialogue();
         }
     }
 
@@ -178,8 +199,7 @@ public class DialogueManager : Singleton<DialogueManager>
     {
         if (!isDialogueActive) return;
 
-        _waitingForAction = false;
-        ShowNext -= ShowNextDialogue;
+        ShowNext -= OnPlayerAct;
 
         _currentIndex++;
 
@@ -201,5 +221,37 @@ public class DialogueManager : Singleton<DialogueManager>
         _currentKey = "";
         _currentIndex = 0;
         isDialogueActive = false;
+    }
+
+    IEnumerator PlayTTS(string data)
+    {
+        string ttsData = TTS_URL + data;
+        
+        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(ttsData, AudioType.MPEG))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"TTS 요청 실패: {www.error}");
+                yield break;
+            }
+
+            AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+            _audioSource.clip = clip;
+            _audioSource.Play();
+            Debug.Log($"{clip.length}");
+            yield return new WaitForSeconds(clip.length);
+            Debug.LogWarning("오디오 다 출력됨");
+        }
+    }
+    string ChangeStringForTTS(string text)
+    {
+        return text + "&tl=Ko-gb";
+    }
+
+    void OnPlayerAct()
+    {
+        _waitingForAction = false;
     }
 }
