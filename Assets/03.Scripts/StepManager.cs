@@ -60,7 +60,7 @@ public class StepManager : MonoBehaviour
         }
 
         // 5. UI & 음성 활성화
-        //DialogueManager.Instance.ShowNext?.Invoke();
+        DialogueManager.Instance.ShowNext?.Invoke();
     }
 
     public void CompleteCurrentStep()

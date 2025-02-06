@@ -22,7 +22,7 @@ public class Step
     // UI & TTS 연동 함수 (한 번에 처리)
     public void StartDialogue()
     {
-        //DialogueManager.Instance.StartDialogue(dialogueKey);  // UI + TTS 자동 실행
+        DialogueManager.Instance.StartDialogue(dialogueKey);  // UI + TTS 자동 실행
     }
 }
 

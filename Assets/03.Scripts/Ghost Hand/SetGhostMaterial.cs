@@ -14,9 +14,10 @@ public class SetGhostMaterial : MonoBehaviour
     void Start()
     {
         _handGrabPose = GetComponent<HandGrabPose>();
-        _handGhostProvider = _handGrabPose._handGhostProvider;
+        // 오류발생
+        //_handGhostProvider = _handGrabPose._handGhostProvider;
 
-        _hand = _handGhostProvider.GetHand(_handGrabPose.HandPose.Handedness);
+        //_hand = _handGhostProvider.GetHand(_handGrabPose.HandPose.Handedness);
 
         SkinnedMeshRenderer skinnedMeshRenderer = _hand.GetComponentInChildren<SkinnedMeshRenderer>();
 
