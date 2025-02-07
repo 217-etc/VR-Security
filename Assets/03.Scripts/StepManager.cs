@@ -9,6 +9,7 @@ public class StepManager : MonoBehaviour
 
     private bool isPlayerActionCompleted = false;  // 플레이어 행동 완료 여부
 
+   
     void Start()
     {
         NextStep();  // 첫 번째 단계 시작
@@ -38,14 +39,23 @@ public class StepManager : MonoBehaviour
         isPlayerActionCompleted = false;  // 새로운 단계에서 플레이어 행동 초기화
 
         // 1. 오브젝트 빛나게 하기 + (아웃라인 추가)
-        ChangeMaterial changeMaterial = step.target?.GetComponent<ChangeMaterial>();
+
+        //재질 변경부분
+        /* ChangeMaterial changeMaterial = step.target?.GetComponent<ChangeMaterial>();
         if (changeMaterial != null)
         {
             changeMaterial.ApplyHighlight(step.materialIndex);  // materialIndex 전달
         }
+        */
+        //아웃라인 부분
+        Outline outline = step.target?.GetComponentInChildren<Outline>();
+        if (outline != null)
+        {
+            outline.enabled = true;  // 아웃라인 켜기
+        }
 
         // 2. UI & 음성 활성화
-        step.StartDialogue();
+        DialogueManager.Instance.StartDialogue(step.dialogueKey);
     }
 
     void EndStep(Step step)
@@ -53,10 +63,20 @@ public class StepManager : MonoBehaviour
         Debug.Log($"단계 종료: {step.stepName}");
 
         // 4. 하이라이트 제거
+
+        //재질 변경부분
+        /*
         ChangeMaterial changeMaterial = step.target?.GetComponent<ChangeMaterial>();
         if (changeMaterial != null)
         {
             changeMaterial.RemoveHighlight(step.materialIndex);  // materialIndex 전달
+        }
+        */
+        //아웃라인 부분
+        Outline outline = step.target?.GetComponentInChildren<Outline>();
+        if (outline != null)
+        {
+            outline.enabled = false; // 아웃라인 끄기
         }
 
         // 5. UI & 음성 활성화
@@ -75,6 +95,7 @@ public class StepManager : MonoBehaviour
     public void OnPlayerActionCompleted() // 해당 함수는 다른 스크립트에서 플레이어 행동이 완료될시 호출
     {
         // 3. 플레이어 행동 완료
+        Debug.Log("플레이어가 행동을 완료했습니다.");
         isPlayerActionCompleted = true;
         CompleteCurrentStep();  // 다음 단계로 이동
     }
