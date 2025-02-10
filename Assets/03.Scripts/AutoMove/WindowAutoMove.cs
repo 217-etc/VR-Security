@@ -15,8 +15,15 @@ public class WindowAutoMove : MonoBehaviour
     public GameObject HandMoveObject;
     public GameObject HandMoveObject_mirror;
 
+    public StepManager stepManager;
+
     void Start()
     {
+        //stepManager = FindObjectOfType<StepManager>();
+        if (stepManager == null)
+        {
+            Debug.LogError("StepManager가 할당되지 않았습니다! Unity 인스펙터에서 할당하세요.");
+        }
     }
 
     void Update()
@@ -53,6 +60,16 @@ public class WindowAutoMove : MonoBehaviour
         Destroy(HandMoveObject);
         Destroy(HandMoveObject_mirror);
         transform.position = targetPosition;
+
+        //플레이어 행동 완료
+        if (stepManager != null)
+        {
+            stepManager.OnPlayerActionCompleted();
+        }
+        else
+        {
+            Debug.LogError("StepManager를 찾을 수 없습니다.");
+        }
     }
     void LockWindow()
     {
