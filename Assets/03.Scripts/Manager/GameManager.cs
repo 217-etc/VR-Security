@@ -6,7 +6,6 @@ using UnityEngine.Networking;
 
 public class GameManager : Singleton<GameManager>
 {
-    public Dictionary<string, DialogueStructure> dialogueData;
     public enum GameState
     {
         Loading,
@@ -17,10 +16,6 @@ public class GameManager : Singleton<GameManager>
 
     async void Start()
     {
-        //Dialogue 데이터 불러오기
-        PaserCSV parser = new PaserCSV();
-        dialogueData = await parser.Parse<DialogueStructure>();
-
         //다 불러와지면 게임 상태 -> Ready
         gameState = GameState.Ready;
         Debug.Log("Game Ready");
