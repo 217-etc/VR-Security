@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TutorialManager : MonoBehaviour
 {
@@ -20,6 +21,9 @@ public class TutorialManager : MonoBehaviour
     private int fistCnt = 0;
 
     private Transform wristTransform; // 손목 Transform
+
+    [SerializeField] List<Image> _tryUI = new List<Image>();
+    [SerializeField] GameObject _circleUI;
 
     void Start()
     {
@@ -77,7 +81,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         Debug.Log("손가락 관절 및 디버그 Sphere 초기화 완료!");
-
+        // 나레이션 재생
         Invoke("DetectStart", 3f);
     }
 
@@ -210,6 +214,14 @@ public class TutorialManager : MonoBehaviour
     private void OnFist()
     {
         Debug.LogWarning("주먹 동작 실행 중...");
+        if(fistCnt > 0 && fistCnt < 4)
+        {
+            _tryUI[fistCnt - 1].color = Color.green;
+            // 효과음 재생
+            // 노란 동그라미 띄우기
+            StartCoroutine(ShowCircleUI());
+            // 세번째 완료되면 다음 씬으로 이동
+        }
     }
 
     private void OnHandOpen()
@@ -239,6 +251,13 @@ public class TutorialManager : MonoBehaviour
                 sphereRenderer.material.color = Color.red;
             }
         }
+    }
+
+    IEnumerator ShowCircleUI()
+    {
+        _circleUI.SetActive(true);
+        yield return new WaitForSeconds(0.5f);
+        _circleUI.SetActive(false);
     }
 }
 

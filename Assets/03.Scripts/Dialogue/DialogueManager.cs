@@ -11,6 +11,7 @@ public struct DialogueTextType
 {
     public string text;
     public string display_behaviour;
+    public string only_audio;
 }
 public class DialogueStructure
 {
@@ -48,6 +49,14 @@ public class DialogueManager : Singleton<DialogueManager>
         {
             DialogueManager.Instance.StartDialogue("Dialogue_A001");
         }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            DialogueManager.Instance.StartDialogue("Dialogue_A002");
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            DialogueManager.Instance.StartDialogue("Dialogue_A003");
+        }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             if( DialogueManager.Instance.ShowNext != null)
@@ -84,6 +93,7 @@ public class DialogueManager : Singleton<DialogueManager>
             string key = values[0].Trim(); // 첫 번째 열이 key
             string text = values[1].Trim(); // 두 번째 열이 대사
             string displayBehaviour = values.Length > 2 ? values[2].Trim() : ""; // 세 번째 열이 display_behaviour
+            string onlyAudio = values.Length > 3 ? values[3].Trim() : ""; // 네 번째 열이 only_audio
 
             if (!string.IsNullOrEmpty(key)) // 새로운 대사 시작 (key가 존재)
             {
@@ -100,12 +110,12 @@ public class DialogueManager : Singleton<DialogueManager>
                 currentKey = key;
                 currentDialogues = new List<DialogueTextType>
                 {
-                    new DialogueTextType { text = text, display_behaviour = displayBehaviour }
+                    new DialogueTextType { text = text, display_behaviour = displayBehaviour, only_audio = onlyAudio}
                 };
             }
             else if (!string.IsNullOrEmpty(text)) // 기존 대사 추가 (key가 비어 있음)
             {
-                currentDialogues.Add(new DialogueTextType { text = text, display_behaviour = displayBehaviour });
+                currentDialogues.Add(new DialogueTextType { text = text, display_behaviour = displayBehaviour, only_audio = onlyAudio });
             }
         }
 
@@ -154,7 +164,6 @@ public class DialogueManager : Singleton<DialogueManager>
         isDialogueActive = true;
 
         // 대사 시작하기
-        _animator.SetTrigger("NoticeAppear");
         StartCoroutine(ShowDialogue());
     }
 
@@ -166,10 +175,29 @@ public class DialogueManager : Singleton<DialogueManager>
         // 출력할 다음 대사가 존재한다면
         if (_currentIndex < dialogueStructure.dialogues.Length)
         {
-            // UI 텍스트 교체
-            TextMeshProUGUI textUI = noticeUI.GetComponentInChildren<TextMeshProUGUI>();
             string text = dialogueStructure.dialogues[_currentIndex].text;
-            textUI.text = text;
+            string audioType = dialogueStructure.dialogues[_currentIndex].only_audio;
+            if (audioType == "N")
+            {
+                // UI 텍스트 교체
+                TextMeshProUGUI textUI = noticeUI.GetComponentInChildren<TextMeshProUGUI>();
+                textUI.text = text;
+
+                // UI가 이미 떠 있지 않은 경우 새로 띄워야 함.
+                if (!noticeUI.activeSelf)
+                {
+                    _animator.SetTrigger("NoticeAppear");
+                }
+            }
+            else
+            {
+                // 오디오만 재생되는 경우
+                // 현재 UI가 떠있는지 체크
+                if (noticeUI.activeSelf)
+                {
+                    _animator.SetTrigger("NoticeDisappear");
+                }
+            }
             StartCoroutine(PlayTTS(ChangeStringForTTS(text)));
 
             Debug.LogWarning($"대사의 행동 타입 : {dialogueStructure.dialogues[_currentIndex].display_behaviour}");
@@ -216,7 +244,10 @@ public class DialogueManager : Singleton<DialogueManager>
     void EndDialogue()
     {
         // 안내문 UI 비활성화
-        _animator.SetTrigger("NoticeDisappear");
+        if (noticeUI.activeSelf)
+        {
+            _animator.SetTrigger("NoticeDisappear");
+        }
         Debug.LogWarning("안내문 종료");
         _currentKey = "";
         _currentIndex = 0;
