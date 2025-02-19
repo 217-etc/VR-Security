@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem.HID;
 
 public class GoriManager : MonoBehaviour
 {
     bool _isComplete = false;
-    [SerializeField] GameObject _jojeolgi;
+    [SerializeField] GameObject _connectedObejct;
 
     [SerializeField] private Transform[] _waypoints; // 이동할 포인트
     [SerializeField] private float _moveSpeed = 1.5f; // 이동 속도
@@ -60,7 +61,9 @@ public class GoriManager : MonoBehaviour
         if (other.CompareTag("Hole") && !_isComplete)
         {
             _isComplete = true;
-            _jojeolgi.transform.parent = gameObject.transform;
+
+            _connectedObejct.transform.parent = gameObject.transform;
+        
             Debug.LogWarning("속도조절기에 닿았음");
             StartCoroutine(MoveAlongBezierCurve());
         }
