@@ -9,7 +9,8 @@ public class StepManager : MonoBehaviour
 
     private bool isPlayerActionCompleted = false;  // 플레이어 행동 완료 여부
 
-   
+
+
     void Start()
     {
         NextStep();  // 첫 번째 단계 시작
@@ -38,6 +39,7 @@ public class StepManager : MonoBehaviour
         Debug.Log($"현재 단계: {step.stepName}");
         isPlayerActionCompleted = false;  // 새로운 단계에서 플레이어 행동 초기화
 
+        
         // 1. 오브젝트 빛나게 하기 + (아웃라인 추가)
 
         //재질 변경부분
@@ -56,6 +58,16 @@ public class StepManager : MonoBehaviour
 
         // 2. UI & 음성 활성화
         DialogueManager.Instance.StartDialogue(step.dialogueKey);
+
+        // 3. 해당 타겟 오브젝트의 자식에서 HandGrabInteractable 찾아 활성화하기
+        Transform[] children = step.target.GetComponentsInChildren<Transform>(true);
+        foreach (Transform child in children)
+        {
+            if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
+            {
+                child.gameObject.SetActive(true);
+            }
+        }
     }
 
     void EndStep(Step step)
@@ -94,7 +106,7 @@ public class StepManager : MonoBehaviour
 
     public void OnPlayerActionCompleted() // 해당 함수는 다른 스크립트에서 플레이어 행동이 완료될시 호출
     {
-        // 3. 플레이어 행동 완료
+        // 4. 플레이어 행동 완료
         Debug.Log("플레이어가 행동을 완료했습니다.");
         isPlayerActionCompleted = true;
         CompleteCurrentStep();  // 다음 단계로 이동
