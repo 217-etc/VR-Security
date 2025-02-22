@@ -7,13 +7,13 @@ public class SoundManager : MonoBehaviour
     public static SoundManager Instance;
 
 
-    public List<SoundData> soundDatabase; // ScriptableObject·ÎºÎÅÍ »ç¿îµå µ¥ÀÌÅÍº£ÀÌ½º °¡Á®¿È
-    private Dictionary<string, SoundData> soundDictionary; // »ç¿îµå¸¦ ºü¸£°Ô Ã£±â À§ÇÑ µñ¼Å³Ê¸®
-    private List<AudioSource> sfxSources = new List<AudioSource>(); // È¿°úÀ½ AudioSource ¸®½ºÆ®
+    public List<SoundData> soundDatabase; // ScriptableObjectë¡œë¶€í„° ì‚¬ìš´ë“œ ë°ì´í„°ë² ì´ìŠ¤ ê°€ì ¸ì˜´
+    private Dictionary<string, SoundData> soundDictionary; // ì‚¬ìš´ë“œë¥¼ ë¹ ë¥´ê²Œ ì°¾ê¸° ìœ„í•œ ë”•ì…”ë„ˆë¦¬
+    private List<AudioSource> sfxSources = new List<AudioSource>(); // íš¨ê³¼ìŒ AudioSource ë¦¬ìŠ¤íŠ¸
 
     private void Awake()
     {
-        // ½Ì±ÛÅæ ÆĞÅÏ Àû¿ë
+        // ì‹±ê¸€í†¤ íŒ¨í„´ ì ìš©
         if (Instance == null)
         {
             Instance = this;
@@ -25,7 +25,7 @@ public class SoundManager : MonoBehaviour
             return;
         }
 
-        // »ç¿îµå µ¥ÀÌÅÍ ÃÊ±âÈ­
+        // ì‚¬ìš´ë“œ ë°ì´í„° ì´ˆê¸°í™”
         soundDictionary = new Dictionary<string, SoundData>();
         foreach (var soundData in soundDatabase)
         {
@@ -33,14 +33,7 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        PlayBGM("Wind");
-        PlayBGM("FireTruck1");
-        PlayBGM("FireTruck2");
-    }
-
-    /// <summary> ¹è°æÀ½¾Ç (BGM) Àç»ı </summary>
+    /// <summary> ë°°ê²½ìŒì•… (BGM) ì¬ìƒ </summary>
     public void PlayBGM(string soundName)
     {
         if (!soundDictionary.ContainsKey(soundName))
@@ -59,7 +52,7 @@ public class SoundManager : MonoBehaviour
         bgmSource.Play();
     }
 
-    /// <summary> È¿°úÀ½ (SFX) Àç»ı </summary>
+    /// <summary> íš¨ê³¼ìŒ (SFX) ì¬ìƒ </summary>
     public void PlaySFX(string soundName)
     {
         if (!soundDictionary.ContainsKey(soundName))
@@ -78,7 +71,7 @@ public class SoundManager : MonoBehaviour
         StartCoroutine(DestroyAfterPlay(sfxSource, data.clip.length));
     }
 
-    /// <summary> Æ¯Á¤ ½Ã°£ ÈÄ¿¡ ¿Àµğ¿À ¼Ò½º¸¦ »èÁ¦ÇÕ´Ï´Ù. </summary>
+    /// <summary> íŠ¹ì • ì‹œê°„ í›„ì— ì˜¤ë””ì˜¤ ì†ŒìŠ¤ë¥¼ ì‚­ì œí•©ë‹ˆë‹¤. </summary>
     private IEnumerator DestroyAfterPlay(AudioSource source, float time)
     {
         yield return new WaitForSeconds(time);
@@ -86,7 +79,7 @@ public class SoundManager : MonoBehaviour
         Destroy(source);
     }
 
-    /// <summary> ¸ğµç È¿°úÀ½ (SFX) Á¤Áö </summary>
+    /// <summary> ëª¨ë“  íš¨ê³¼ìŒ (SFX) ì •ì§€ </summary>
     public void StopAllSFX()
     {
         foreach (var source in sfxSources)

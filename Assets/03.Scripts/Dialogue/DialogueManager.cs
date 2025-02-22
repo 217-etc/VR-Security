@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public struct DialogueTextType
 {
@@ -23,10 +24,10 @@ public class DialogueManager : Singleton<DialogueManager>
 {
     private const string GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1cI32XyRtkvbBQhcp7X-bqHLbGvLRB0LizHmtGTCLAZA/export?format=csv&gid=0";
     private const string TTS_URL = "https://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=";
-    //µñ¼Å³Ê¸® »ı¼ºÇÏ±â
+    //ë”•ì…”ë„ˆë¦¬ ìƒì„±í•˜ê¸°
     public Dictionary<string, DialogueStructure> dialougeDictionary = new Dictionary<string, DialogueStructure>();
-    public GameObject noticeUI; // ¾È³»¹® UI
-    private Animator _animator; // ¾È³»¹® Animator
+    public GameObject noticeUI; // ì•ˆë‚´ë¬¸ UI
+    private Animator _animator; // ì•ˆë‚´ë¬¸ Animator
     private AudioSource _audioSource;
 
     public bool isDialogueActive = false;
@@ -35,7 +36,12 @@ public class DialogueManager : Singleton<DialogueManager>
     private int _currentIndex = 0;
     public Action ShowNext;
     private bool _waitingForAction = true;
-    
+
+    // íŒŒì‹± ë¡œë”©
+    public TextMeshProUGUI progressText;
+    public GameObject loadingUI;
+    public GameObject selectUI;
+
     async void Start()
     {
         await ParseCSV();
@@ -43,61 +49,40 @@ public class DialogueManager : Singleton<DialogueManager>
         _audioSource = GetComponent<AudioSource>();
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            DialogueManager.Instance.StartDialogue("Dialogue_A001");
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            DialogueManager.Instance.StartDialogue("Dialogue_A002");
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            DialogueManager.Instance.StartDialogue("Dialogue_A003");
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            if( DialogueManager.Instance.ShowNext != null)
-            {
-                Debug.LogWarning("ÇÃ·¹ÀÌ¾î°¡ Çàµ¿À» ÇÔ");
-                DialogueManager.Instance.ShowNext?.Invoke();
-            }
-        }
-    }
     public async Task ParseCSV()
     {
-        // CSV µ¥ÀÌÅÍ °¡Á®¿À±â
+        // CSV ë°ì´í„° ê°€ì ¸ì˜¤ê¸°
         string csvData = await FetchGoogleSheetData(GOOGLE_SHEET_URL);
 
         if (csvData == null)
         {
-            Debug.LogWarning("csv fileÀ» Ã£À» ¼ö ¾øÀ½.");
+            Debug.LogWarning("csv fileì„ ì°¾ì„ ìˆ˜ ì—†ìŒ.");
+
             return;
         }
 
-        // ¿£ÅÍ¸¦ ±âÁØÀ¸·Î ÁÙ ³ª´©±â
+        // ì—”í„°ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ì¤„ ë‚˜ëˆ„ê¸°
         string[] datas = csvData.Split('\n');
+        int totalLines = datas.Length - 6;
 
-        string currentKey = ""; // ÇöÀç ´ë»ç Å° °ª
-        List<DialogueTextType> currentDialogues = new List<DialogueTextType>(); // ÇöÀç ´ë»ç ¸®½ºÆ®
+        string currentKey = ""; // í˜„ì¬ ëŒ€ì‚¬ í‚¤ ê°’
+        List<DialogueTextType> currentDialogues = new List<DialogueTextType>(); // í˜„ì¬ ëŒ€ì‚¬ ë¦¬ìŠ¤íŠ¸
 
-        // 6¹øÂ° ÁÙºÎÅÍ µ¥ÀÌÅÍ ½ÃÀÛ (Çì´õ´Â 5¹øÂ° ÁÙ)
+        // 6ë²ˆì§¸ ì¤„ë¶€í„° ë°ì´í„° ì‹œì‘ (í—¤ë”ëŠ” 5ë²ˆì§¸ ì¤„)
         for (int i = 6; i < datas.Length; i++)
         {
             string[] values = datas[i].Split(',');
 
-            if (values.Length < 2) continue; // ºó ÁÙ ¶Ç´Â À¯È¿ÇÏÁö ¾ÊÀº µ¥ÀÌÅÍ ¹æÁö
+            if (values.Length < 2) continue; // ë¹ˆ ì¤„ ë˜ëŠ” ìœ íš¨í•˜ì§€ ì•Šì€ ë°ì´í„° ë°©ì§€
 
-            string key = values[0].Trim(); // Ã¹ ¹øÂ° ¿­ÀÌ key
-            string text = values[1].Trim(); // µÎ ¹øÂ° ¿­ÀÌ ´ë»ç
-            string displayBehaviour = values.Length > 2 ? values[2].Trim() : ""; // ¼¼ ¹øÂ° ¿­ÀÌ display_behaviour
-            string onlyAudio = values.Length > 3 ? values[3].Trim() : ""; // ³× ¹øÂ° ¿­ÀÌ only_audio
+            string key = values[0].Trim(); // ì²« ë²ˆì§¸ ì—´ì´ key
+            string text = values[1].Trim(); // ë‘ ë²ˆì§¸ ì—´ì´ ëŒ€ì‚¬
+            string displayBehaviour = values.Length > 2 ? values[2].Trim() : ""; // ì„¸ ë²ˆì§¸ ì—´ì´ display_behaviour
+            string onlyAudio = values.Length > 3 ? values[3].Trim() : ""; // ë„¤ ë²ˆì§¸ ì—´ì´ only_audio
 
-            if (!string.IsNullOrEmpty(key)) // »õ·Î¿î ´ë»ç ½ÃÀÛ (key°¡ Á¸Àç)
+            if (!string.IsNullOrEmpty(key)) // ìƒˆë¡œìš´ ëŒ€ì‚¬ ì‹œì‘ (keyê°€ ì¡´ì¬)
             {
-                if (!string.IsNullOrEmpty(currentKey)) // ÀÌÀü ´ë»ç°¡ ÀÖ´Ù¸é ÀúÀå
+                if (!string.IsNullOrEmpty(currentKey)) // ì´ì „ ëŒ€ì‚¬ê°€ ìˆë‹¤ë©´ ì €ì¥
                 {
                     dialougeDictionary[currentKey] = new DialogueStructure
                     {
@@ -106,20 +91,27 @@ public class DialogueManager : Singleton<DialogueManager>
                     };
                 }
 
-                // »õ·Î¿î ´ë»ç Å°¿Í ÃÊ±âÈ­µÈ ´ë»ç ¸®½ºÆ® ¼³Á¤
+                // ìƒˆë¡œìš´ ëŒ€ì‚¬ í‚¤ì™€ ì´ˆê¸°í™”ëœ ëŒ€ì‚¬ ë¦¬ìŠ¤íŠ¸ ì„¤ì •
                 currentKey = key;
                 currentDialogues = new List<DialogueTextType>
                 {
                     new DialogueTextType { text = text, display_behaviour = displayBehaviour, only_audio = onlyAudio}
                 };
             }
-            else if (!string.IsNullOrEmpty(text)) // ±âÁ¸ ´ë»ç Ãß°¡ (key°¡ ºñ¾î ÀÖÀ½)
+            else if (!string.IsNullOrEmpty(text)) // ê¸°ì¡´ ëŒ€ì‚¬ ì¶”ê°€ (keyê°€ ë¹„ì–´ ìˆìŒ)
             {
                 currentDialogues.Add(new DialogueTextType { text = text, display_behaviour = displayBehaviour, only_audio = onlyAudio });
             }
+
+            // ì§„í–‰ ìƒíƒœ ì—…ë°ì´íŠ¸
+            float progress = (float)(i - 6) / totalLines;
+            loadingUI.GetComponent<Slider>().value = progress;
+            progressText.text = $"{(progress * 100):F1}%";
+
+            await Task.Delay(10);
         }
 
-        // ¸¶Áö¸· ´ë»ç ÀúÀå
+        // ë§ˆì§€ë§‰ ëŒ€ì‚¬ ì €ì¥
         if (!string.IsNullOrEmpty(currentKey))
         {
             dialougeDictionary[currentKey] = new DialogueStructure
@@ -129,7 +121,9 @@ public class DialogueManager : Singleton<DialogueManager>
             };
         }
 
-        Debug.LogWarning("CSV µ¥ÀÌÅÍ ÆÄ½Ì ¿Ï·á! ´ë»ç °³¼ö: " + dialougeDictionary.Count);
+        Debug.LogWarning("CSV ë°ì´í„° íŒŒì‹± ì™„ë£Œ! ëŒ€ì‚¬ ê°œìˆ˜: " + dialougeDictionary.Count);
+        loadingUI.SetActive(false);
+        selectUI.SetActive(true);
     }
 
     private async Task<string> FetchGoogleSheetData(string url)
@@ -150,20 +144,20 @@ public class DialogueManager : Singleton<DialogueManager>
         }
     }
 
-    //´ÙÀÌ¾ó·Î±× ¶ç¿ì±â
+    //ë‹¤ì´ì–¼ë¡œê·¸ ë„ìš°ê¸°
     public void StartDialogue(string dialogueKey)
     {
         if (isDialogueActive)
         {
-            Debug.LogWarning("ÀÌ¹Ì ½ÇÇà ÁßÀÎ ´ë»ç°¡ ÀÖ½À´Ï´Ù.");
+            Debug.LogWarning("ì´ë¯¸ ì‹¤í–‰ ì¤‘ì¸ ëŒ€ì‚¬ê°€ ìˆìŠµë‹ˆë‹¤.");
             return;
         }
-        // ´ë»ç Á¤º¸ ÀúÀåÇÏ±â
+        // ëŒ€ì‚¬ ì •ë³´ ì €ì¥í•˜ê¸°
         _currentKey = dialogueKey;
         _currentIndex = 0;
         isDialogueActive = true;
 
-        // ´ë»ç ½ÃÀÛÇÏ±â
+        // ëŒ€ì‚¬ ì‹œì‘í•˜ê¸°
         StartCoroutine(ShowDialogue());
     }
 
@@ -172,18 +166,18 @@ public class DialogueManager : Singleton<DialogueManager>
         if (!isDialogueActive) yield break;
         DialogueStructure dialogueStructure = dialougeDictionary[_currentKey];
 
-        // Ãâ·ÂÇÒ ´ÙÀ½ ´ë»ç°¡ Á¸ÀçÇÑ´Ù¸é
+        // ì¶œë ¥í•  ë‹¤ìŒ ëŒ€ì‚¬ê°€ ì¡´ì¬í•œë‹¤ë©´
         if (_currentIndex < dialogueStructure.dialogues.Length)
         {
             string text = dialogueStructure.dialogues[_currentIndex].text;
             string audioType = dialogueStructure.dialogues[_currentIndex].only_audio;
             if (audioType == "N")
             {
-                // UI ÅØ½ºÆ® ±³Ã¼
+                // UI í…ìŠ¤íŠ¸ êµì²´
                 TextMeshProUGUI textUI = noticeUI.GetComponentInChildren<TextMeshProUGUI>();
                 textUI.text = text;
 
-                // UI°¡ ÀÌ¹Ì ¶° ÀÖÁö ¾ÊÀº °æ¿ì »õ·Î ¶ç¿ö¾ß ÇÔ.
+                // UIê°€ ì´ë¯¸ ë–  ìˆì§€ ì•Šì€ ê²½ìš° ìƒˆë¡œ ë„ì›Œì•¼ í•¨.
                 if (!noticeUI.activeSelf)
                 {
                     _animator.SetTrigger("NoticeAppear");
@@ -191,8 +185,8 @@ public class DialogueManager : Singleton<DialogueManager>
             }
             else
             {
-                // ¿Àµğ¿À¸¸ Àç»ıµÇ´Â °æ¿ì
-                // ÇöÀç UI°¡ ¶°ÀÖ´ÂÁö Ã¼Å©
+                // ì˜¤ë””ì˜¤ë§Œ ì¬ìƒë˜ëŠ” ê²½ìš°
+                // í˜„ì¬ UIê°€ ë– ìˆëŠ”ì§€ ì²´í¬
                 if (noticeUI.activeSelf)
                 {
                     _animator.SetTrigger("NoticeDisappear");
@@ -200,25 +194,25 @@ public class DialogueManager : Singleton<DialogueManager>
             }
             StartCoroutine(PlayTTS(ChangeStringForTTS(text)));
 
-            Debug.LogWarning($"´ë»çÀÇ Çàµ¿ Å¸ÀÔ : {dialogueStructure.dialogues[_currentIndex].display_behaviour}");
-            // Å¸ÀÔÀÌ auto¸é
+            Debug.LogWarning($"ëŒ€ì‚¬ì˜ í–‰ë™ íƒ€ì… : {dialogueStructure.dialogues[_currentIndex].display_behaviour}");
+            // íƒ€ì…ì´ autoë©´
             if (dialogueStructure.dialogues[_currentIndex].display_behaviour == "auto")
             {
                 yield return new WaitForSeconds(autoDialgoueDuration);
             }
             else
             {
-                // act Å¸ÀÔÀÌ¸é, ÇÃ·¹ÀÌ¾î°¡ actÇÒ ¶§±îÁö ´ë±â
+                // act íƒ€ì…ì´ë©´, í”Œë ˆì´ì–´ê°€ actí•  ë•Œê¹Œì§€ ëŒ€ê¸°
                 ShowNext += OnPlayerAct;
                 _waitingForAction = true;
                 yield return new WaitUntil(() => !_waitingForAction);
-                Debug.LogWarning("ÇÃ·¹ÀÌ¾î°¡ Çàµ¿À» ÇÔ!");
+                Debug.LogWarning("í”Œë ˆì´ì–´ê°€ í–‰ë™ì„ í•¨!");
             }
             ShowNextDialogue();
         }
-        else // ´ÙÀ½ ´ë»ç°¡ ¾ø´Ù¸é
+        else // ë‹¤ìŒ ëŒ€ì‚¬ê°€ ì—†ë‹¤ë©´
         {
-            // ´ë»ç Ãâ·Â Á¾·á
+            // ëŒ€ì‚¬ ì¶œë ¥ ì¢…ë£Œ
             EndDialogue();
         }
     }
@@ -243,12 +237,12 @@ public class DialogueManager : Singleton<DialogueManager>
 
     void EndDialogue()
     {
-        // ¾È³»¹® UI ºñÈ°¼ºÈ­
+        // ì•ˆë‚´ë¬¸ UI ë¹„í™œì„±í™”
         if (noticeUI.activeSelf)
         {
             _animator.SetTrigger("NoticeDisappear");
         }
-        Debug.LogWarning("¾È³»¹® Á¾·á");
+        Debug.LogWarning("ì•ˆë‚´ë¬¸ ì¢…ë£Œ");
         _currentKey = "";
         _currentIndex = 0;
         isDialogueActive = false;
@@ -264,7 +258,7 @@ public class DialogueManager : Singleton<DialogueManager>
 
             if (www.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogError($"TTS ¿äÃ» ½ÇÆĞ: {www.error}");
+                Debug.LogError($"TTS ìš”ì²­ ì‹¤íŒ¨: {www.error}");
                 yield break;
             }
 
@@ -273,7 +267,7 @@ public class DialogueManager : Singleton<DialogueManager>
             _audioSource.Play();
             Debug.Log($"{clip.length}");
             yield return new WaitForSeconds(clip.length);
-            Debug.LogWarning("¿Àµğ¿À ´Ù Ãâ·ÂµÊ");
+            Debug.LogWarning("ì˜¤ë””ì˜¤ ë‹¤ ì¶œë ¥ë¨");
         }
     }
     string ChangeStringForTTS(string text)

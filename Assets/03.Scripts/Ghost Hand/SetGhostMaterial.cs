@@ -8,23 +8,20 @@ public class SetGhostMaterial : MonoBehaviour
 {
     [SerializeField] private Material ghostMaterial;
     [SerializeField] private HandGrabPose _handGrabPose;
-    private HandGhostProvider _handGhostProvider;
+    public HandGhostProvider _handGhostProvider;
     private HandGhost _hand;
     
     void Start()
     {
         _handGrabPose = GetComponent<HandGrabPose>();
-        // ¿À·ù¹ß»ı
-        //_handGhostProvider = _handGrabPose._handGhostProvider;
-
-        //_hand = _handGhostProvider.GetHand(_handGrabPose.HandPose.Handedness);
+        _hand = _handGhostProvider.GetHand(_handGrabPose.HandPose.Handedness);
 
         SkinnedMeshRenderer skinnedMeshRenderer = _hand.GetComponentInChildren<SkinnedMeshRenderer>();
 
         if (skinnedMeshRenderer != null)
         {
             skinnedMeshRenderer.material = ghostMaterial;
-            Debug.Log("¼º°øÀûÀ¸·Î Ghost Material Àû¿ë ¿Ï·á");
+            Debug.Log("ì„±ê³µì ìœ¼ë¡œ Ghost Material ì ìš© ì™„ë£Œ");
         }
     }
 }
