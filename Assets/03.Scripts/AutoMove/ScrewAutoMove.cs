@@ -7,14 +7,16 @@ using Oculus.Interaction.Grab;
 public class ScrewAutoMove : MonoBehaviour
 {
     public StepManager stepManager;
-    private bool isLocked = false; // ³ª»ç°¡ °íÁ¤µÇ¾ú´ÂÁö ¿©ºÎ
-    private bool isRotating = false; // È¸Àü ÁßÀÎÁö ¿©ºÎ
-    private int rotateCount = 0; // È¸Àü È½¼ö
-    private float rotationStep = 120f; // ÀÚµ¿ È¸Àü °¢µµ (½Ã°è ¹æÇâ)
-    private float positionStep = 0.0078547f; // YÃà ÀÌµ¿ °Å¸®
-    private float requiredRotation = 10f; // »ç¿ëÀÚ°¡ ÃÖ¼ÒÇÑÀ¸·Î È¸ÀüÇØ¾ß ÇÏ´Â °¢µµ
-    private Vector3 initialPosition; // ÃÊ±â À§Ä¡ ÀúÀå
+    private bool isLocked = false; // ë‚˜ì‚¬ê°€ ê³ ì •ë˜ì—ˆëŠ”ì§€ ì—¬ë¶€
+    private bool isRotating = false; // íšŒì „ ì¤‘ì¸ì§€ ì—¬ë¶€
+    private int rotateCount = 0; // íšŒì „ íšŸìˆ˜
+    private float rotationStep = 120f; // ìë™ íšŒì „ ê°ë„ (ì‹œê³„ ë°©í–¥)
+    private float positionStep = 0.0078547f; // Yì¶• ì´ë™ ê±°ë¦¬
+    private float requiredRotation = 10f; // ì‚¬ìš©ìê°€ ìµœì†Œí•œìœ¼ë¡œ íšŒì „í•´ì•¼ í•˜ëŠ” ê°ë„
+    private Vector3 initialPosition; // ì´ˆê¸° ìœ„ì¹˜ ì €ì¥
     private float lastRotationY;
+
+    public ScrewGauge screwGauge;  // ìƒˆë¡œìš´ ìŠ¤í¬ë¥˜ ê²Œì´ì§€ ì‹œìŠ¤í…œ ì¶”ê°€
 
     public GameObject HandMoveObject;
     public GameObject HandMoveObject_mirror;
@@ -22,40 +24,40 @@ public class ScrewAutoMove : MonoBehaviour
     void Start()
     {
         initialPosition = transform.position;
-        lastRotationY = transform.localEulerAngles.y;  // ÃÊ±â°ª ¼³Á¤
+        lastRotationY = transform.localEulerAngles.y;  // ì´ˆê¸°ê°’ ì„¤ì •
     }
 
     void Update()
     {
-        if (isLocked || isRotating) return; // È¸Àü ÁßÀÌ°Å³ª °íÁ¤µÈ °æ¿ì ½ÇÇà ¾È ÇÔ
+        if (isLocked || isRotating) return; // íšŒì „ ì¤‘ì´ê±°ë‚˜ ê³ ì •ëœ ê²½ìš° ì‹¤í–‰ ì•ˆ í•¨
 
         float currentRotationY = transform.localEulerAngles.y;
-        float rotationDiff = Mathf.DeltaAngle(lastRotationY, currentRotationY);  // È¸Àü º¯È­·® °è»ê
+        float rotationDiff = Mathf.DeltaAngle(lastRotationY, currentRotationY);  // íšŒì „ ë³€í™”ëŸ‰ ê³„ì‚°
 
-        Debug.Log($"ÇöÀç È¸Àü °¢µµ: {currentRotationY}, ÀÌÀü È¸Àü: {lastRotationY}, Â÷ÀÌ: {rotationDiff}");
+        Debug.Log($"í˜„ì¬ íšŒì „ ê°ë„: {currentRotationY}, ì´ì „ íšŒì „: {lastRotationY}, ì°¨ì´: {rotationDiff}");
 
-        // **½Ã°è ¹æÇâ(¹İ½Ã°è´Â ¹«½Ã) & ÃÖ¼Ò 10µµ ÀÌ»ó È¸Àü ½Ã °¨Áö**
+        // **ì‹œê³„ ë°©í–¥(ë°˜ì‹œê³„ëŠ” ë¬´ì‹œ) & ìµœì†Œ 10ë„ ì´ìƒ íšŒì „ ì‹œ ê°ì§€**
         if (rotationDiff <= -requiredRotation)
         {
-            Debug.Log("È¸Àü °¨Áö: ½Ã°è ¹æÇâ");
+            Debug.Log("íšŒì „ ê°ì§€: ì‹œê³„ ë°©í–¥");
             StartCoroutine(AutoRotateAndMove());
         }
     }
 
     IEnumerator AutoRotateAndMove()
     {
-        isRotating = true;  // È¸Àü ½ÃÀÛ
+        isRotating = true;  // íšŒì „ ì‹œì‘
         rotateCount++;
 
         float elapsedTime = 0f;
-        float moveDuration = 1.0f; // ÀÚµ¿ ÀÌµ¿ ½Ã°£
+        float moveDuration = 1.0f; // ìë™ ì´ë™ ì‹œê°„
 
         Quaternion startRotation = transform.rotation;
-        Quaternion targetRotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y - rotationStep, transform.eulerAngles.z); // ½Ã°è ¹æÇâ È¸Àü
+        Quaternion targetRotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y - rotationStep, transform.eulerAngles.z); // ì‹œê³„ ë°©í–¥ íšŒì „
         Vector3 startPosition = transform.position;
-        Vector3 targetPosition = startPosition + new Vector3(0, positionStep, 0); // YÃà ÀÌµ¿
+        Vector3 targetPosition = startPosition + new Vector3(0, positionStep, 0); // Yì¶• ì´ë™
 
-        // HandGrabInteractable ºñÈ°¼ºÈ­
+        // HandGrabInteractable ë¹„í™œì„±í™”
         ToggleGrabInteractable(false);
 
         while (elapsedTime < moveDuration)
@@ -69,28 +71,35 @@ public class ScrewAutoMove : MonoBehaviour
         transform.rotation = targetRotation;
         transform.position = targetPosition;
 
-        // **¸¶Áö¸· È¸Àü°ª ¾÷µ¥ÀÌÆ® (´ÙÀ½ È¸Àü °¨Áö¸¦ À§ÇØ)**
+        // **ë§ˆì§€ë§‰ íšŒì „ê°’ ì—…ë°ì´íŠ¸ (ë‹¤ìŒ íšŒì „ ê°ì§€ë¥¼ ìœ„í•´)**
         lastRotationY = transform.localEulerAngles.y;
 
-        // HandGrabInteractable ´Ù½Ã È°¼ºÈ­
+        // HandGrabInteractable ë‹¤ì‹œ í™œì„±í™”
         ToggleGrabInteractable(true);
 
-        isRotating = false; // È¸Àü ¿Ï·á
+        isRotating = false; // íšŒì „ ì™„ë£Œ
 
-        // 3¹ø È¸ÀüÇÏ¸é °íÁ¤
+        // **ìŠ¤í¬ë¥˜ ê²Œì´ì§€ ì—…ë°ì´íŠ¸ (3ë²ˆ íšŒì „ ì¤‘ í˜„ì¬ ëª‡ ë²ˆì§¸ì¸ì§€ ë¹„ìœ¨ë¡œ ì „ë‹¬)**
+        if (screwGauge != null)
+        {
+            screwGauge.UpdateScrewGauge(rotateCount / 3f); // 0~1 ê°’ìœ¼ë¡œ ë³€í™˜
+        }
+
+        // 3ë²ˆ íšŒì „í•˜ë©´ ê³ ì •
         if (rotateCount >= 3)
         {
             isLocked = true;
             stepManager?.OnPlayerActionCompleted();
 
-            // ÀÌµ¿ÀÌ ³¡³­ µÚ Àâ±â ±â´É Á¦°Å
+            // ì´ë™ì´ ëë‚œ ë’¤ ì¡ê¸° ê¸°ëŠ¥ ì œê±°
             Destroy(HandMoveObject);
             Destroy(HandMoveObject_mirror);
-            Debug.Log("³ª»ç°¡ ¿ÏÀüÈ÷ Á¶¿©Á³½À´Ï´Ù.!!");
+
+            Debug.Log("ë‚˜ì‚¬ê°€ ì™„ì „íˆ ì¡°ì—¬ì¡ŒìŠµë‹ˆë‹¤.!!");
         }
     }
 
-    // HandGrabInteractable È°¼ºÈ­/ºñÈ°¼ºÈ­
+    // HandGrabInteractable í™œì„±í™”/ë¹„í™œì„±í™”
     private void ToggleGrabInteractable(bool state)
     {
         Transform[] children = GetComponentsInChildren<Transform>(true);
@@ -99,7 +108,7 @@ public class ScrewAutoMove : MonoBehaviour
             if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
             {
                 child.gameObject.SetActive(state);
-                Debug.Log("HandGrabInteractable Ã£¾Æ¼­ È°¼ºÈ­&ºñÈ°¼ºÈ­!!");
+                Debug.Log("HandGrabInteractable ì°¾ì•„ì„œ í™œì„±í™”&ë¹„í™œì„±í™”!!");
             }
         }
     }
