@@ -45,22 +45,10 @@ public class ScrewGauge : MonoBehaviour
             if (!gaugeImage.gameObject.activeSelf)
                 gaugeImage.gameObject.SetActive(true);
         }
-        /*
-        // 게이지 배경 위치 및 방향 설정
-        if (gaugeParent != null)
-        {
-            Vector3 gaugePosition = gaugeParent.position + new Vector3(0, 0.3f, 0);  // 위치 조정
-            gaugeImage.transform.position = gaugePosition;
-            gaugeImage.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
-
-            gaugeBG.transform.position = gaugePosition;
-            gaugeBG.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
-        }*/
 
         // 게이지가 가득 찬 경우
         if (gaugeValue >= 1f && !isGaugeFull)
         {
-            Debug.Log("스크류 게이지가 가득 찼습니다!");
             isGaugeFull = true;  // 중복 출력 방지
         }
         else if (gaugeValue < 1f)
