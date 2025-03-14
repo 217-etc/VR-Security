@@ -5,18 +5,13 @@ using UnityEngine;
 public class StepManager : MonoBehaviour
 {
     public StepUIManager stepUI; // UI 매니저 연결
-    
-
     public List<Step> steps = new List<Step>();  // 모든 단계 정보 저장
     private int currentStepIndex = -1;  // 현재 단계 인덱스 (-1부터 시작)
-
     private bool isPlayerActionCompleted = false;  // 플레이어 행동 완료 여부
-
 
 
     void Start()
     {
-        
         NextStep();  // 첫 번째 단계 시작
     }
 
@@ -53,23 +48,14 @@ public class StepManager : MonoBehaviour
             stepUI.UpdateStepText(step.stepName);
         }
 
-        // 1. 오브젝트 빛나게 하기 + (아웃라인 추가)
-
-        //재질 변경부분
-        /* ChangeMaterial changeMaterial = step.target?.GetComponent<ChangeMaterial>();
-        if (changeMaterial != null)
-        {
-            changeMaterial.ApplyHighlight(step.materialIndex);  // materialIndex 전달
-        }
-        */
-        //아웃라인 부분
+        // 1. 오브젝트 아웃라인 활성화
         Outline outline = step.target?.GetComponentInChildren<Outline>();
         if (outline != null)
         {
             outline.enabled = true;  // 아웃라인 켜기
         }
 
-        // 2. UI & 음성 활성화
+        // 2. UI & 음성 활성화 + 오브젝트 할당UI 활성화
         DialogueManager.Instance.StartDialogue(step.dialogueKey);
 
         // 3. 해당 타겟 오브젝트의 자식에서 HandGrabInteractable 찾아 활성화하기
@@ -87,17 +73,7 @@ public class StepManager : MonoBehaviour
     {
         Debug.Log($"단계 종료: {step.stepName}");
 
-        // 4. 하이라이트 제거
-
-        //재질 변경부분
-        /*
-        ChangeMaterial changeMaterial = step.target?.GetComponent<ChangeMaterial>();
-        if (changeMaterial != null)
-        {
-            changeMaterial.RemoveHighlight(step.materialIndex);  // materialIndex 전달
-        }
-        */
-        //아웃라인 부분
+        // 4. 오브젝트 아웃라인 비활성화
         Outline outline = step.target?.GetComponentInChildren<Outline>();
         if (outline != null)
         {
