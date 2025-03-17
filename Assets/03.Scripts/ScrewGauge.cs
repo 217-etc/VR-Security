@@ -5,28 +5,58 @@ using UnityEngine.UI;
 
 public class ScrewGauge : MonoBehaviour
 {
+    [Header("Gauge Settings")]
     public Image gaugeImage;
     public Image gaugeBG;
     public Transform gaugeParent;
 
-    private float gaugeValue = 0f;
+    private float gaugeValue = 0f;          // 현재 게이지 값 (0~1)
+    private float previousGaugeValue = 0f;   // 이전 프레임의 게이지 값
+    private bool isGaugeFull = false;        // 게이지가 가득 찼는지 확인
+
+    void Start()
+    {
+        if (gaugeImage != null)
+            gaugeImage.fillAmount = 0f;     // 시작 시 게이지를 0으로 설정
+
+        if (gaugeBG != null)
+            gaugeBG.gameObject.SetActive(true);  // 배경은 항상 활성화
+    }
 
     public void UpdateScrewGauge(float value)
     {
-        gaugeValue = Mathf.Clamp01(value); // 0~1 사이 값으로 제한
-        gaugeImage.fillAmount = gaugeValue;
+        // 게이지 값 업데이트 (0 ~ 1 범위로 제한)
+        float newGaugeValue = Mathf.Clamp01(value);
 
-        if (gaugeParent != null)
+        // 이전 값보다 작아지지 않도록 설정 (감소 방지)
+        if (newGaugeValue < previousGaugeValue)
         {
-            gaugeImage.transform.position = gaugeParent.position + new Vector3(0, 30, 0);
-            gaugeImage.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
-            gaugeBG.transform.position = gaugeParent.position + new Vector3(0, 30, 0);
-            gaugeBG.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
+            newGaugeValue = previousGaugeValue;  // 이전 값 유지
         }
 
-        if (gaugeValue == 1f)
+        gaugeValue = newGaugeValue;  // 최종 게이지 값 갱신
+
+        // 게이지 UI 업데이트
+        if (gaugeImage != null)
         {
-            Debug.Log("스크류 게이지가 가득 찼습니다!");
+            gaugeImage.fillAmount = gaugeValue;
+
+            // 게이지가 사라지는 현상 방지
+            if (!gaugeImage.gameObject.activeSelf)
+                gaugeImage.gameObject.SetActive(true);
         }
+
+        // 게이지가 가득 찬 경우
+        if (gaugeValue >= 1f && !isGaugeFull)
+        {
+            isGaugeFull = true;  // 중복 출력 방지
+        }
+        else if (gaugeValue < 1f)
+        {
+            isGaugeFull = false; // 게이지가 다시 내려가면 초기화
+        }
+
+        // 이전 프레임의 게이지 값 저장
+        previousGaugeValue = gaugeValue;
     }
 }
