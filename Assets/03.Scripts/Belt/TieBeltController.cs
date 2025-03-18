@@ -19,6 +19,8 @@ public class TieBeltController : MonoBehaviour
 
     public Animator animator;
     private float distance;
+    private float lastProgress;
+    float progress = 0f;
 
     private void Awake()
     {
@@ -35,6 +37,7 @@ public class TieBeltController : MonoBehaviour
     {
         if (IsComplete) return;
 
+        Debug.Log(progress);
         if (IsGrabBelt)
         {
             //Debug.Log("[Belt] : Connect Belt를 잡고 있음");
@@ -67,6 +70,7 @@ public class TieBeltController : MonoBehaviour
     {
         IsGrabBelt = false;
         Debug.Log("[Belt] : Connect Belt를 놓음");
+        animator.speed = 0f;
     }
     // Gori를 잡았을 때
     public void GrabGori()
@@ -79,6 +83,7 @@ public class TieBeltController : MonoBehaviour
     {
         IsGrabGori = false;
         Debug.Log("[Belt] : Gori를 놓음");
+        animator.speed = 0f;
     }
 
     public void TieGori()
@@ -86,14 +91,22 @@ public class TieBeltController : MonoBehaviour
         float distanceToStart = Vector3.Distance(goriTransform.localPosition, startPos);
 
         // 이동 진행도를 0~1 범위로 정규화
-        float progress = Mathf.Clamp(distanceToStart / distance, 0f, 1f);
+        progress = Mathf.Clamp(distanceToStart / distance, 0f, 1f);
         Debug.Log($"[Progress] DistanceToStart: {distanceToStart}, Normalized Progress: {progress}");
 
-        // 벨트 애니메이션 4개 동시 실행 (각 레이어에 적용)
+        if (Mathf.Approximately(progress, lastProgress))
+        {
+            animator.speed = 0f;
+            return;
+        }
+
+        lastProgress = progress;
+
         int layerCount = animator.layerCount;
         for (int i = 0; i < layerCount; i++)
         {
             animator.Play("Tie", i, progress);
+            animator.speed = 1f;
         }
 
         // 이동 완료 체크
