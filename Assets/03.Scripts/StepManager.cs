@@ -8,6 +8,7 @@ public class StepManager : MonoBehaviour
     public List<Step> steps = new List<Step>();  // 모든 단계 정보 저장
     private int currentStepIndex = -1;  // 현재 단계 인덱스 (-1부터 시작)
     private bool isPlayerActionCompleted = false;  // 플레이어 행동 완료 여부
+    private bool isStepInProgress = false;  // 중복 실행 방지용 플래그
 
 
     void Start()
@@ -17,6 +18,9 @@ public class StepManager : MonoBehaviour
 
     void NextStep()
     {
+        if (isStepInProgress) return;  // 중복 실행 방지
+        isStepInProgress = true;
+
         if (currentStepIndex >= 0 && currentStepIndex < steps.Count)
         {
             EndStep(steps[currentStepIndex]);  // 이전 단계 정리
@@ -31,6 +35,7 @@ public class StepManager : MonoBehaviour
         }
 
         StartStep(steps[currentStepIndex]);  // 새로운 단계 시작
+        isStepInProgress = false;
     }
 
     void StartStep(Step step)
@@ -67,37 +72,53 @@ public class StepManager : MonoBehaviour
                 child.gameObject.SetActive(true);
             }
         }
+
+        // 4. 게이지 UI 활성화
+        if (step.gaugeUI != null)
+        {
+            Debug.Log("고리게이지 활성화~");
+            step.gaugeUI.SetActive(true);
+        }
+
     }
 
     void EndStep(Step step)
     {
         Debug.Log($"단계 종료: {step.stepName}");
 
-        // 4. 오브젝트 아웃라인 비활성화
+        // 5. 오브젝트 아웃라인 비활성화
         Outline outline = step.target?.GetComponentInChildren<Outline>();
         if (outline != null)
         {
             outline.enabled = false; // 아웃라인 끄기
         }
 
-        // 5. UI & 음성 활성화
+        // 6. UI & 음성 활성화
         DialogueManager.Instance.ShowNext?.Invoke();
+
+        // 7. 게이지 UI 비활성화
+        if (step.gaugeUI != null)
+        {
+            step.gaugeUI.SetActive(false);
+        }
     }
 
     public void CompleteCurrentStep()
     {
-        if (isPlayerActionCompleted)
-        {
-            Debug.Log("현재 단계 완료. 다음 단계로 이동합니다.");
-            NextStep();
-        }
+        if (isPlayerActionCompleted) return;  // 🔹 중복 실행 방지
+        isPlayerActionCompleted = true;
+
+        Debug.Log("현재 단계 완료. 다음 단계로 이동합니다.");
+
+        Invoke(nameof(NextStep), 0.1f);  // 약간의 딜레이 후 실행 (혹시 모를 중복 호출 방지)
     }
 
     public void OnPlayerActionCompleted() // 해당 함수는 다른 스크립트에서 플레이어 행동이 완료될시 호출
     {
-        // 4. 플레이어 행동 완료
+        // 8. 플레이어 행동 완료
+        if (isPlayerActionCompleted) return;  // 이미 완료된 경우 실행 방지
+
         Debug.Log("플레이어가 행동을 완료했습니다.");
-        isPlayerActionCompleted = true;
-        CompleteCurrentStep();  // 다음 단계로 이동
+        CompleteCurrentStep();
     }
 }
