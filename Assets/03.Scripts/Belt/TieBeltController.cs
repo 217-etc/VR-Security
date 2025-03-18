@@ -86,6 +86,12 @@ public class TieBeltController : MonoBehaviour
 
     public void TieGori()
     {
+        if(goriTransformer.Constraints.MaxZ.Value > goriTransform.localPosition.z)
+        {
+            goriTransformer.Constraints.MaxZ.Value = goriTransform.localPosition.z;
+        }
+
+
         float distanceToStart = Vector3.Distance(goriTransform.localPosition, startPos);
 
         // 이동 진행도를 0~1 범위로 정규화
