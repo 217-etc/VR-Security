@@ -1,8 +1,6 @@
 using Oculus.Interaction;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TieBeltController : MonoBehaviour
 {
@@ -101,6 +99,7 @@ public class TieBeltController : MonoBehaviour
         }
 
         lastProgress = progress;
+        GetComponent<ScrewGauge>().UpdateScrewGauge(progress);
 
         int layerCount = animator.layerCount;
         for (int i = 0; i < layerCount; i++)
