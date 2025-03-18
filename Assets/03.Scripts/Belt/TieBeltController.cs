@@ -10,6 +10,8 @@ public class TieBeltController : MonoBehaviour
     [SerializeField] private bool IsGrabGori = false;
     [SerializeField] private bool IsComplete = false;
     [SerializeField] private OneGrabTranslateTransformer goriTransformer;
+    [SerializeField] private GameObject gori; 
+    [SerializeField] private GameObject belt; 
 
     public Transform goriTransform;
     public Vector3 startPos;
@@ -84,7 +86,7 @@ public class TieBeltController : MonoBehaviour
         float distanceToStart = Vector3.Distance(goriTransform.localPosition, startPos);
 
         // 이동 진행도를 0~1 범위로 정규화
-        float progress = distanceToStart / distance;
+        float progress = Mathf.Clamp(distanceToStart / distance, 0f, 1f);
         Debug.Log($"[Progress] DistanceToStart: {distanceToStart}, Normalized Progress: {progress}");
 
         // 벨트 애니메이션 4개 동시 실행 (각 레이어에 적용)
@@ -99,6 +101,7 @@ public class TieBeltController : MonoBehaviour
         {
             Debug.Log("[Belt] : 벨트 조이기를 완수함.");
             IsComplete = true;
+            SetActiveFalse();
         }
     }
 
@@ -110,5 +113,12 @@ public class TieBeltController : MonoBehaviour
         goriTransformer.Constraints.MinY.Value = minY;
         goriTransformer.Constraints.MinZ.Constrain = true;
         goriTransformer.Constraints.MinZ.Value = minZ;
+    }
+
+
+    void SetActiveFalse()
+    {
+        gori.SetActive(false);
+        belt.SetActive(false);
     }
 }
