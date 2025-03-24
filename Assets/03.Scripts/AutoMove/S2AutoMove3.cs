@@ -32,9 +32,10 @@ public class S2AutoMove3 : MonoBehaviour
     void Update()
     {
         if (isLocked) return;
-        Debug.Log("S2의 X축 회전값: " + transform.localEulerAngles.x + " / S2 y축 위치: " + transform.localPosition.y);
+        // Debug.Log("S2의 X축 회전값: " + transform.localEulerAngles.x + " / S2 y축 위치: " + transform.localPosition.y);
 
         // 일단 y축 위치가 -3보다 작으면 -3으로 이동
+        // 시작 회전값 -179.5 (395.5)
         // 잡는 모션 -> 각도가 359보다 작아지면 = 잡고 좀이라도 움직이면
         if (transform.localEulerAngles.x <=359.0f && transform.localPosition.y <= -3f && !hasMoved)
         {
@@ -87,6 +88,9 @@ public class S2AutoMove3 : MonoBehaviour
 
     IEnumerator MoveS2Smoothly2()
     {
+        Destroy(HandMoveObject);
+        Destroy(HandMoveObject_mirror);
+
         float elapsedTime = 0f;
         Vector3 S2startPosition2 = transform.localPosition;
         Vector3 S2targetPosition2 = new Vector3(S2startPosition2.x, targetY2, S2startPosition2.z);
@@ -100,27 +104,24 @@ public class S2AutoMove3 : MonoBehaviour
         }
 
         transform.localPosition = S2targetPosition2; 
-        Destroy(HandMoveObject);
-        Destroy(HandMoveObject_mirror);
         LockWindow();
     }
 
     IEnumerator MoveS2RotateToTarget(float targetXRotation)
     {
         float elapsedTime = 0f;
-        float moveDuration = 1.0f; // 회전하는 데 걸리는 시간
+        float moveDuration = 1.0f;
         float startXRotation = transform.localEulerAngles.x;
 
         while (elapsedTime < moveDuration)
         {
-            if (isLocked) yield break; // 고정 상태면 종료
+            if (isLocked) yield break;
 
-            // 현재 회전값과 목표 회전값 사이를 보간
             float newXRotation = Mathf.Lerp(startXRotation, targetXRotation, elapsedTime / moveDuration);
             transform.localEulerAngles = new Vector3(newXRotation, transform.localEulerAngles.y, transform.localEulerAngles.z);
 
             elapsedTime += Time.deltaTime;
-            yield return null; // 한 프레임 기다림
+            yield return null;
         }
 
         // 최종 회전값 보정
