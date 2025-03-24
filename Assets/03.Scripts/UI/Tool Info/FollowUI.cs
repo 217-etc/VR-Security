@@ -1,54 +1,53 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class FollowUI : MonoBehaviour
 {
-    [SerializeField] private Transform _centerEye;
+    [SerializeField] private Transform _playerCamera;  
     [SerializeField] private float _followSpeed = 5f;
-    [SerializeField] private float _maxOffsetX = 0.5f;
     [SerializeField] private float _bufferTime = 0.5f;
-    [SerializeField] private float _rotationMultiplier = 0.01f;
 
-    private Vector3 _initialPosition;
-    private float _initialYaw;
+    private float _initialDistance;
+    private Vector3 _initialOffset;
+
     private Vector3 _targetPosition;
+    private Vector3 _velocity = Vector3.zero;
 
     void Start()
     {
-        if (_centerEye == null)
+        if (_playerCamera == null)
         {
-            Debug.LogError("Center Eye∞° º≥¡§µ«¡ˆ æ æ“Ω¿¥œ¥Ÿ.");
+            Debug.LogError("Player CameraÍ∞Ä ÏÑ§Ï†ïÎêòÏßÄ ÏïäÏïòÏäµÎãàÎã§.");
             return;
         }
 
-        _initialPosition = transform.position;
-        _initialYaw = _centerEye.eulerAngles.y;
-        _targetPosition = _initialPosition;
+        
+        _initialOffset = transform.position - _playerCamera.position;
+        _initialOffset.y = 0; 
+        _initialDistance = _initialOffset.magnitude;
+
+        _targetPosition = transform.position;
     }
 
     void Update()
     {
-        if (_centerEye != null)
-        {
-            Vector3 eulerRotation = _centerEye.eulerAngles;
-            float currentYaw = eulerRotation.y;
-            float yawDifference = currentYaw - _initialYaw;
+        if (_playerCamera == null) return;
 
-            float offsetX = Mathf.Clamp(-yawDifference * _rotationMultiplier, -_maxOffsetX, _maxOffsetX);
+        Vector3 playerPosition = _playerCamera.position;
+        playerPosition.y = transform.position.y; 
 
-            Vector3 forwardDirection = _centerEye.forward;
-            forwardDirection.y = 0;
-            forwardDirection.Normalize();
+        float yawAngle = _playerCamera.eulerAngles.y;
+        Quaternion rotation = Quaternion.AngleAxis(yawAngle, Vector3.up);
 
-            Vector3 newTargetPosition = _centerEye.position + forwardDirection * 2f + _centerEye.right * offsetX;
-            newTargetPosition.y = _initialPosition.y;
+        Vector3 newTargetPosition = playerPosition + rotation * (_initialOffset.normalized * _initialDistance);
 
-            _targetPosition = Vector3.Lerp(_targetPosition, newTargetPosition, Time.deltaTime / _bufferTime);
-            transform.position = Vector3.Lerp(transform.position, _targetPosition, _followSpeed * Time.deltaTime);
+        _targetPosition = Vector3.SmoothDamp(_targetPosition, newTargetPosition, ref _velocity, _bufferTime);
+        transform.position = _targetPosition;
 
-            Quaternion targetRotation = Quaternion.Euler(0, _centerEye.eulerAngles.y, 0);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, _followSpeed * Time.deltaTime);
-        }
+        Vector3 lookDirection = _playerCamera.position - transform.position;
+        lookDirection.y = 0;
+        transform.rotation = Quaternion.LookRotation(lookDirection) * Quaternion.Euler(0, 180, 0);
     }
 }
