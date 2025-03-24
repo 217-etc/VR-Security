@@ -35,11 +35,11 @@ public class S3AutoMove : MonoBehaviour
     {
         if (isLocked) return;
 
-        bool S41Moved = s4AutoMove != null && s4AutoMove.GetS41Moved();
+        // S4에서 S41Moved 상태를 받아옴
+        bool S41Moved = s4AutoMove != null && s4AutoMove.GetS41Moved(); // 잘 할당됨
         // Debug.Log("S3의 X축 회전값: " + transform.localEulerAngles.x);
 
         // S41Moved가 참이면 그랩 활성화
-        // S3 살살 잡아야 함!
         if (S41Moved) { ActivateHandMoveObjects(); }
 
         // S41Moved가 참이고 x축 회전값이 0도이면 → 그랩 비활성화 + S3Moved = true
