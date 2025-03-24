@@ -4,66 +4,62 @@ using UnityEngine;
 
 public class StepManager : MonoBehaviour
 {
-    public StepUIManager stepUI; // UI ë§¤ë‹ˆì € ì—°ê²°
-    public List<Step> steps = new List<Step>();  // ëª¨ë“  ë‹¨ê³„ ì •ë³´ ì €ì¥
-    private int currentStepIndex = -1;  // í˜„ì¬ ë‹¨ê³„ ì¸ë±ìŠ¤ (-1ë¶€í„° ì‹œì‘)
-    private bool isPlayerActionCompleted = false;  // í”Œë ˆì´ì–´ í–‰ë™ ì™„ë£Œ ì—¬ë¶€
-    private bool isStepInProgress = false;  // ì¤‘ë³µ ì‹¤í–‰ ë°©ì§€ìš© í”Œë˜ê·¸
+    public List<Step> steps = new List<Step>();  // ¸ğµç ´Ü°è Á¤º¸ ÀúÀå
+    private int currentStepIndex = -1;  // ÇöÀç ´Ü°è ÀÎµ¦½º (-1ºÎÅÍ ½ÃÀÛ)
+
+    private bool isPlayerActionCompleted = false;  // ÇÃ·¹ÀÌ¾î Çàµ¿ ¿Ï·á ¿©ºÎ
+
 
 
     void Start()
     {
-        NextStep();  // ì²« ë²ˆì§¸ ë‹¨ê³„ ì‹œì‘
+        NextStep();  // Ã¹ ¹øÂ° ´Ü°è ½ÃÀÛ
     }
 
     void NextStep()
     {
-        if (isStepInProgress) return;  // ì¤‘ë³µ ì‹¤í–‰ ë°©ì§€
-        isStepInProgress = true;
-
         if (currentStepIndex >= 0 && currentStepIndex < steps.Count)
         {
-            EndStep(steps[currentStepIndex]);  // ì´ì „ ë‹¨ê³„ ì •ë¦¬
+            EndStep(steps[currentStepIndex]);  // ÀÌÀü ´Ü°è Á¤¸®
         }
 
         currentStepIndex++;
 
         if (currentStepIndex >= steps.Count)
         {
-            Debug.Log("ëª¨ë“  ë‹¨ê³„ë¥¼ ì™„ë£Œí–ˆìŠµë‹ˆë‹¤.");
+            Debug.Log("¸ğµç ´Ü°è¸¦ ¿Ï·áÇß½À´Ï´Ù.");
             return;
         }
 
-        StartStep(steps[currentStepIndex]);  // ìƒˆë¡œìš´ ë‹¨ê³„ ì‹œì‘
-        isStepInProgress = false;
+        StartStep(steps[currentStepIndex]);  // »õ·Î¿î ´Ü°è ½ÃÀÛ
     }
 
     void StartStep(Step step)
     {
-        Debug.Log($"í˜„ì¬ ë‹¨ê³„: {step.stepName}");
+        Debug.Log($"ÇöÀç ´Ü°è: {step.stepName}");
+        isPlayerActionCompleted = false;  // »õ·Î¿î ´Ü°è¿¡¼­ ÇÃ·¹ÀÌ¾î Çàµ¿ ÃÊ±âÈ­
 
-        isPlayerActionCompleted = false;  // ìƒˆë¡œìš´ ë‹¨ê³„ì—ì„œ í”Œë ˆì´ì–´ í–‰ë™ ì´ˆê¸°í™”
+        
+        // 1. ¿ÀºêÁ§Æ® ºû³ª°Ô ÇÏ±â + (¾Æ¿ô¶óÀÎ Ãß°¡)
 
-        if (stepUI == null)
+        //ÀçÁú º¯°æºÎºĞ
+        /* ChangeMaterial changeMaterial = step.target?.GetComponent<ChangeMaterial>();
+        if (changeMaterial != null)
         {
-            stepUI = FindObjectOfType<StepUIManager>();
+            changeMaterial.ApplyHighlight(step.materialIndex);  // materialIndex Àü´Ş
         }
-        if (stepUI != null)
-        {
-            stepUI.UpdateStepText(step.stepName);
-        }
-
-        // 1. ì˜¤ë¸Œì íŠ¸ ì•„ì›ƒë¼ì¸ í™œì„±í™”
+        */
+        //¾Æ¿ô¶óÀÎ ºÎºĞ
         Outline outline = step.target?.GetComponentInChildren<Outline>();
         if (outline != null)
         {
-            outline.enabled = true;  // ì•„ì›ƒë¼ì¸ ì¼œê¸°
+            outline.enabled = true;  // ¾Æ¿ô¶óÀÎ ÄÑ±â
         }
 
-        // 2. UI & ìŒì„± í™œì„±í™” + ì˜¤ë¸Œì íŠ¸ í• ë‹¹UI í™œì„±í™”
+        // 2. UI & À½¼º È°¼ºÈ­
         DialogueManager.Instance.StartDialogue(step.dialogueKey);
 
-        // 3. í•´ë‹¹ íƒ€ê²Ÿ ì˜¤ë¸Œì íŠ¸ì˜ ìì‹ì—ì„œ HandGrabInteractable ì°¾ì•„ í™œì„±í™”í•˜ê¸°
+        // 3. ÇØ´ç Å¸°Ù ¿ÀºêÁ§Æ®ÀÇ ÀÚ½Ä¿¡¼­ HandGrabInteractable Ã£¾Æ È°¼ºÈ­ÇÏ±â
         Transform[] children = step.target.GetComponentsInChildren<Transform>(true);
         foreach (Transform child in children)
         {
@@ -72,53 +68,47 @@ public class StepManager : MonoBehaviour
                 child.gameObject.SetActive(true);
             }
         }
-
-        // 4. ê²Œì´ì§€ UI í™œì„±í™”
-        if (step.gaugeUI != null)
-        {
-            Debug.Log("ê³ ë¦¬ê²Œì´ì§€ í™œì„±í™”~");
-            step.gaugeUI.SetActive(true);
-        }
-
     }
 
     void EndStep(Step step)
     {
-        Debug.Log($"ë‹¨ê³„ ì¢…ë£Œ: {step.stepName}");
+        Debug.Log($"´Ü°è Á¾·á: {step.stepName}");
 
-        // 5. ì˜¤ë¸Œì íŠ¸ ì•„ì›ƒë¼ì¸ ë¹„í™œì„±í™”
+        // 4. ÇÏÀÌ¶óÀÌÆ® Á¦°Å
+
+        //ÀçÁú º¯°æºÎºĞ
+        /*
+        ChangeMaterial changeMaterial = step.target?.GetComponent<ChangeMaterial>();
+        if (changeMaterial != null)
+        {
+            changeMaterial.RemoveHighlight(step.materialIndex);  // materialIndex Àü´Ş
+        }
+        */
+        //¾Æ¿ô¶óÀÎ ºÎºĞ
         Outline outline = step.target?.GetComponentInChildren<Outline>();
         if (outline != null)
         {
-            outline.enabled = false; // ì•„ì›ƒë¼ì¸ ë„ê¸°
+            outline.enabled = false; // ¾Æ¿ô¶óÀÎ ²ô±â
         }
 
-        // 6. UI & ìŒì„± í™œì„±í™”
+        // 5. UI & À½¼º È°¼ºÈ­
         DialogueManager.Instance.ShowNext?.Invoke();
-
-        // 7. ê²Œì´ì§€ UI ë¹„í™œì„±í™”
-        if (step.gaugeUI != null)
-        {
-            step.gaugeUI.SetActive(false);
-        }
     }
 
     public void CompleteCurrentStep()
     {
-        if (isPlayerActionCompleted) return;  // ğŸ”¹ ì¤‘ë³µ ì‹¤í–‰ ë°©ì§€
-        isPlayerActionCompleted = true;
-
-        Debug.Log("í˜„ì¬ ë‹¨ê³„ ì™„ë£Œ. ë‹¤ìŒ ë‹¨ê³„ë¡œ ì´ë™í•©ë‹ˆë‹¤.");
-
-        Invoke(nameof(NextStep), 0.1f);  // ì•½ê°„ì˜ ë”œë ˆì´ í›„ ì‹¤í–‰ (í˜¹ì‹œ ëª¨ë¥¼ ì¤‘ë³µ í˜¸ì¶œ ë°©ì§€)
+        if (isPlayerActionCompleted)
+        {
+            Debug.Log("ÇöÀç ´Ü°è ¿Ï·á. ´ÙÀ½ ´Ü°è·Î ÀÌµ¿ÇÕ´Ï´Ù.");
+            NextStep();
+        }
     }
 
-    public void OnPlayerActionCompleted() // í•´ë‹¹ í•¨ìˆ˜ëŠ” ë‹¤ë¥¸ ìŠ¤í¬ë¦½íŠ¸ì—ì„œ í”Œë ˆì´ì–´ í–‰ë™ì´ ì™„ë£Œë ì‹œ í˜¸ì¶œ
+    public void OnPlayerActionCompleted() // ÇØ´ç ÇÔ¼ö´Â ´Ù¸¥ ½ºÅ©¸³Æ®¿¡¼­ ÇÃ·¹ÀÌ¾î Çàµ¿ÀÌ ¿Ï·áµÉ½Ã È£Ãâ
     {
-        // 8. í”Œë ˆì´ì–´ í–‰ë™ ì™„ë£Œ
-        if (isPlayerActionCompleted) return;  // ì´ë¯¸ ì™„ë£Œëœ ê²½ìš° ì‹¤í–‰ ë°©ì§€
-
-        Debug.Log("í”Œë ˆì´ì–´ê°€ í–‰ë™ì„ ì™„ë£Œí–ˆìŠµë‹ˆë‹¤.");
-        CompleteCurrentStep();
+        // 4. ÇÃ·¹ÀÌ¾î Çàµ¿ ¿Ï·á
+        Debug.Log("ÇÃ·¹ÀÌ¾î°¡ Çàµ¿À» ¿Ï·áÇß½À´Ï´Ù.");
+        isPlayerActionCompleted = true;
+        CompleteCurrentStep();  // ´ÙÀ½ ´Ü°è·Î ÀÌµ¿
     }
 }
