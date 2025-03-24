@@ -6,25 +6,26 @@ using UnityEngine;
 [System.Serializable]
 public class Step
 {
-    public string stepName;      // ´Ü°è ÀÌ¸§
-    public GameObject target;    // »óÈ£ÀÛ¿ëÇÒ ¿ÀºêÁ§Æ®
-    public string dialogueKey;   // ¿¢¼¿ µ¥ÀÌÅÍ¿¡¼­ ºÒ·¯¿Ã Å°°ª (TTS & UI ¿¬µ¿)
-    
+    public string stepName;      // ë‹¨ê³„ ì´ë¦„
+    public GameObject target;    // ìƒí˜¸ì‘ìš©í•  ì˜¤ë¸Œì íŠ¸
+    public string dialogueKey;   // ì—‘ì…€ ë°ì´í„°ì—ì„œ ë¶ˆëŸ¬ì˜¬ í‚¤ê°’ (TTS & UI ì—°ë™)
+    public GameObject gaugeUI;   // ë‹¨ê³„ë³„ ê²Œì´ì§€ UI ì¶”ê°€
 
-    // »ı¼ºÀÚ
-    public Step(string name, GameObject targetObj, string key)
+
+    // ìƒì„±ì
+    public Step(string name, GameObject targetObj, string key, GameObject gauge = null)
     {
         stepName = name;
         target = targetObj;
-        dialogueKey = key;   // ¿¢¼¿ ÆÄÀÏ¿¡¼­ ºÒ·¯¿Ã Å°°ª
-        
+        dialogueKey = key;   // ì—‘ì…€ íŒŒì¼ì—ì„œ ë¶ˆëŸ¬ì˜¬ í‚¤ê°’
+        gaugeUI = gauge;   // ê²Œì´ì§€ UI í• ë‹¹
     }
 
-    // UI & TTS ¿¬µ¿ ÇÔ¼ö (ÇÑ ¹ø¿¡ Ã³¸®)
+    // UI & TTS ì—°ë™ í•¨ìˆ˜ (í•œ ë²ˆì— ì²˜ë¦¬)
     /*
     public void StartDialogue()
     {
-        DialogueManager.Instance.StartDialogue(dialogueKey);  // UI + TTS ÀÚµ¿ ½ÇÇà
+        DialogueManager.Instance.StartDialogue(dialogueKey);  // UI + TTS ìë™ ì‹¤í–‰
     }
     */
 }
