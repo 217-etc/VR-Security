@@ -5,17 +5,17 @@ using UnityEngine;
 public class ReelAutoMove : MonoBehaviour
 {
     public StepManager stepManager;
-    private bool actionCompleted = false; // ÇÑ ¹ø¸¸ ½ÇÇàµÇµµ·Ï Ã¼Å©
-    private float thresholdY = -0.1f; // Æ®¸®°ÅµÇ´Â Y ÁÂÇ¥ °ª
+    private bool actionCompleted = false; // í•œ ë²ˆë§Œ ì‹¤í–‰ë˜ë„ë¡ ì²´í¬
+    private float thresholdY = -0.1f; // íŠ¸ë¦¬ê±°ë˜ëŠ” Y ì¢Œí‘œ ê°’
 
-    public GameObject HandMoveObject;
-    public GameObject HandMoveObject_mirror;
+    //public GameObject HandMoveObject;
+    //public GameObject HandMoveObject_mirror;
 
     void Start()
     {
         if (stepManager == null)
         {
-            Debug.LogError("StepManager°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù! Unity ÀÎ½ºÆåÅÍ¿¡¼­ ÇÒ´çÇÏ¼¼¿ä.");
+            Debug.LogError("StepManagerê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤! Unity ì¸ìŠ¤í™í„°ì—ì„œ í• ë‹¹í•˜ì„¸ìš”.");
         }
     }
 
@@ -23,13 +23,13 @@ public class ReelAutoMove : MonoBehaviour
     {
         if (!actionCompleted && transform.position.y <= thresholdY)
         {
-            actionCompleted = true; // Áßº¹ ½ÇÇà ¹æÁö
-            Debug.Log("¸±ÀÌ ¸ñÇ¥ À§Ä¡¿¡ µµ´ŞÇß½À´Ï´Ù! ÇÃ·¹ÀÌ¾î Çàµ¿ ¿Ï·á Ã³¸®.");
+            actionCompleted = true; // ì¤‘ë³µ ì‹¤í–‰ ë°©ì§€
+            //Debug.Log("ë¦´ì´ ëª©í‘œ ìœ„ì¹˜ì— ë„ë‹¬í–ˆìŠµë‹ˆë‹¤! í”Œë ˆì´ì–´ í–‰ë™ ì™„ë£Œ ì²˜ë¦¬.");
             stepManager?.OnPlayerActionCompleted();
 
-            // ÀÌµ¿ÀÌ ³¡³­ µÚ Àâ±â ±â´É Á¦°Å
-            Destroy(HandMoveObject);
-            Destroy(HandMoveObject_mirror);
+            // ì´ë™ì´ ëë‚œ ë’¤ ì¡ê¸° ê¸°ëŠ¥ ì œê±°
+            //Destroy(HandMoveObject);
+            //Destroy(HandMoveObject_mirror);
         }
     }
 }

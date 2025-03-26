@@ -80,26 +80,45 @@ public class StepManager : MonoBehaviour
             step.gaugeUI.SetActive(true);
         }
 
+        // 5. 가이드 손 활성화 (GuideHand)
+        foreach (Transform child in children)
+        {
+            if (child.name.Contains("GuideHand"))
+            {
+                child.gameObject.SetActive(true);
+            }
+        }
+
     }
 
     void EndStep(Step step)
     {
         Debug.Log($"단계 종료: {step.stepName}");
 
-        // 5. 오브젝트 아웃라인 비활성화
+        // 6. 오브젝트 아웃라인 비활성화
         Outline outline = step.target?.GetComponentInChildren<Outline>();
         if (outline != null)
         {
             outline.enabled = false; // 아웃라인 끄기
         }
 
-        // 6. UI & 음성 활성화
+        // 7. UI & 음성 활성화
         DialogueManager.Instance.ShowNext?.Invoke();
 
-        // 7. 게이지 UI 비활성화
+        // 8. 게이지 UI 비활성화
         if (step.gaugeUI != null)
         {
             step.gaugeUI.SetActive(false);
+        }
+
+        // 9. HandGrab 오브젝트 비활성화
+        Transform[] children = step.target.GetComponentsInChildren<Transform>(true);
+        foreach (Transform child in children)
+        {
+            if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
+            {
+                child.gameObject.SetActive(false); // 비활성화만
+            }
         }
     }
 
@@ -115,10 +134,26 @@ public class StepManager : MonoBehaviour
 
     public void OnPlayerActionCompleted() // 해당 함수는 다른 스크립트에서 플레이어 행동이 완료될시 호출
     {
-        // 8. 플레이어 행동 완료
+        // 10. 플레이어 행동 완료
         if (isPlayerActionCompleted) return;  // 이미 완료된 경우 실행 방지
 
         Debug.Log("플레이어가 행동을 완료했습니다.");
         CompleteCurrentStep();
+    }
+
+    // 물체를 Grab했을 때
+    public void WhenGrabbedObject()
+    {
+        if (currentStepIndex >= 0 && currentStepIndex < steps.Count)
+        {
+            Transform[] children = steps[currentStepIndex].target.GetComponentsInChildren<Transform>(true);
+            foreach (Transform child in children)
+            {
+                if (child.name.Contains("GuideHand"))
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
+        }
     }
 }

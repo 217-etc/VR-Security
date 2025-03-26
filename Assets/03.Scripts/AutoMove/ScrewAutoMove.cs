@@ -18,8 +18,8 @@ public class ScrewAutoMove : MonoBehaviour
 
     public ScrewGauge screwGauge;  // 새로운 스크류 게이지 시스템 추가
 
-    public GameObject HandMoveObject;
-    public GameObject HandMoveObject_mirror;
+    //public GameObject HandMoveObject;
+    //public GameObject HandMoveObject_mirror;
 
     void Start()
     {
@@ -92,10 +92,10 @@ public class ScrewAutoMove : MonoBehaviour
             stepManager?.OnPlayerActionCompleted();
 
             // 이동이 끝난 뒤 잡기 기능 제거
-            Destroy(HandMoveObject);
-            Destroy(HandMoveObject_mirror);
+            //Destroy(HandMoveObject);
+            //Destroy(HandMoveObject_mirror);
 
-            Debug.Log("나사가 완전히 조여졌습니다.!!");
+            //Debug.Log("나사가 완전히 조여졌습니다.!!");
         }
     }
 
@@ -108,7 +108,7 @@ public class ScrewAutoMove : MonoBehaviour
             if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
             {
                 child.gameObject.SetActive(state);
-                Debug.Log("HandGrabInteractable 찾아서 활성화&비활성화!!");
+                //Debug.Log("HandGrabInteractable 찾아서 활성화&비활성화!!");
             }
         }
     }
