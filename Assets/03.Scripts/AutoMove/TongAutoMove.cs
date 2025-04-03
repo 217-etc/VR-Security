@@ -6,14 +6,14 @@ using Oculus.Interaction.Grab;
 
 public class TongAutoMove : MonoBehaviour
 {
-    private bool hasRotated = false; // ÀÌ¹Ì ÀÌµ¿Çß´ÂÁö Ã¼Å©
-    private bool isLocked = false; // ¸ñÇ¥ °¢µµ¿¡ µµ´ÞÇß´ÂÁö Ã¼Å©
-    private float targetRotation = -90f; // ¸ñÇ¥ È¸Àü°¢µµ
-    private float moveDuration = 1.0f; // ÀÌµ¿ÇÏ´Â µ¥ °É¸®´Â ½Ã°£
-    private float rotationThreshold = -60f; // ÀÚµ¿ È¸Àü Æ®¸®°Å °¢µµ
+    private bool hasRotated = false; // ì´ë¯¸ ì´ë™í–ˆëŠ”ì§€ ì²´í¬
+    private bool isLocked = false; // ëª©í‘œ ê°ë„ì— ë„ë‹¬í–ˆëŠ”ì§€ ì²´í¬
+    private float targetRotation = -90f; // ëª©í‘œ íšŒì „ê°ë„
+    private float moveDuration = 1.0f; // ì´ë™í•˜ëŠ” ë° ê±¸ë¦¬ëŠ” ì‹œê°„
+    private float rotationThreshold = -60f; // ìžë™ íšŒì „ íŠ¸ë¦¬ê±° ê°ë„
 
-    public GameObject HandMoveObject;
-    public GameObject HandMoveObject_mirror;
+    //public GameObject HandMoveObject;
+    //public GameObject HandMoveObject_mirror;
 
     public StepManager stepManager;
 
@@ -21,22 +21,22 @@ public class TongAutoMove : MonoBehaviour
     {
         if (stepManager == null)
         {
-            Debug.LogError("StepManager°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù! Unity ÀÎ½ºÆåÅÍ¿¡¼­ ÇÒ´çÇÏ¼¼¿ä.");
+            Debug.LogError("StepManagerê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤! Unity ì¸ìŠ¤íŽ™í„°ì—ì„œ í• ë‹¹í•˜ì„¸ìš”.");
         }
     }
 
     void Update()
     {
-        if (isLocked) return; // ÀÌ¹Ì ¸ñÇ¥¿¡ µµ´ÞÇß´Ù¸é ½ÇÇà X
+        if (isLocked) return; // ì´ë¯¸ ëª©í‘œì— ë„ë‹¬í–ˆë‹¤ë©´ ì‹¤í–‰ X
 
         float angleX = transform.localEulerAngles.x;
-        if (angleX > 180f) angleX -= 360f; // 360µµ¸¦ ³Ñ¾î°¡¸é -°ªÀ¸·Î º¯È¯
+        if (angleX > 180f) angleX -= 360f; // 360ë„ë¥¼ ë„˜ì–´ê°€ë©´ -ê°’ìœ¼ë¡œ ë³€í™˜
 
-        // »ç¿ëÀÚ°¡ ÅëÀ» ¿­´Ù°¡ ¼ÕÀ» ³õ¾ÒÀ» ¶§, Æ¯Á¤ °¢µµ ÀÌÇÏÀÎÁö È®ÀÎ ÈÄ ÀÚµ¿ º¹±Í
+        // ì‚¬ìš©ìžê°€ í†µì„ ì—´ë‹¤ê°€ ì†ì„ ë†“ì•˜ì„ ë•Œ, íŠ¹ì • ê°ë„ ì´í•˜ì¸ì§€ í™•ì¸ í›„ ìžë™ ë³µê·€
         if (angleX <= rotationThreshold && !hasRotated)
         {
             StartCoroutine(RotateBackSmoothly());
-            hasRotated = true; // ÇÑ ¹ø¸¸ ½ÇÇàµÇµµ·Ï ¼³Á¤
+            hasRotated = true; // í•œ ë²ˆë§Œ ì‹¤í–‰ë˜ë„ë¡ ì„¤ì •
         }
     }
 
@@ -48,27 +48,27 @@ public class TongAutoMove : MonoBehaviour
 
         while (elapsedTime < moveDuration)
         {
-            if (isLocked) yield break; // ÀÌ¹Ì °íÁ¤µÇ¾ú´Ù¸é Áï½Ã Á¾·á
+            if (isLocked) yield break; // ì´ë¯¸ ê³ ì •ë˜ì—ˆë‹¤ë©´ ì¦‰ì‹œ ì¢…ë£Œ
             transform.rotation = Quaternion.Lerp(startRotation, targetRotationQ, elapsedTime / moveDuration);
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
-        transform.rotation = targetRotationQ; // ÃÖÁ¾ º¸Á¤
-        LockTong(); // Åë °íÁ¤
+        transform.rotation = targetRotationQ; // ìµœì¢… ë³´ì •
+        LockTong(); // í†µ ê³ ì •
 
-        // ÀÌµ¿ÀÌ ³¡³­ µÚ Àâ±â ±â´É Á¦°Å
-        Destroy(HandMoveObject);
-        Destroy(HandMoveObject_mirror);
+        // ì´ë™ì´ ëë‚œ ë’¤ ìž¡ê¸° ê¸°ëŠ¥ ì œê±°
+        //Destroy(HandMoveObject);
+        //Destroy(HandMoveObject_mirror);
 
-        // ÇÃ·¹ÀÌ¾î Çàµ¿ ¿Ï·á
+        // í”Œë ˆì´ì–´ í–‰ë™ ì™„ë£Œ
         if (stepManager != null)
         {
             stepManager.OnPlayerActionCompleted();
         }
         else
         {
-            Debug.LogError("StepManager¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("StepManagerë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
     }
 

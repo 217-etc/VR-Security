@@ -7,13 +7,12 @@ using Oculus.Interaction.Grab;
 
 public class WindowAutoMove : MonoBehaviour
 {
-    private bool hasMoved = false; // Ã¢¹®ÀÌ ÀÌ¹Ì ÀÌµ¿Çß´ÂÁö Ã¼Å©
-    private bool isLocked = false; // Ã¢¹®ÀÌ 4.423¿¡ µµ´ŞÇß´ÂÁö Ã¼Å©
-    private float targetZ = 4.423f; // ¸ñÇ¥ Z À§Ä¡
-    private float moveDuration = 1.0f; // ÀÌµ¿ÇÏ´Â µ¥ °É¸®´Â ½Ã°£
+    private bool hasMoved = false; // ì°½ë¬¸ì´ ì´ë¯¸ ì´ë™í–ˆëŠ”ì§€ ì²´í¬
+    private bool isLocked = false; // ì°½ë¬¸ì´ 4.423ì— ë„ë‹¬í–ˆëŠ”ì§€ ì²´í¬
+    private float targetZ = 4.423f; // ëª©í‘œ Z ìœ„ì¹˜
+    private float moveDuration = 1.0f; // ì´ë™í•˜ëŠ” ë° ê±¸ë¦¬ëŠ” ì‹œê°„
 
-    public GameObject HandMoveObject;
-    public GameObject HandMoveObject_mirror;
+    
 
     public StepManager stepManager;
 
@@ -22,19 +21,19 @@ public class WindowAutoMove : MonoBehaviour
         //stepManager = FindObjectOfType<StepManager>();
         if (stepManager == null)
         {
-            Debug.LogError("StepManager°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù! Unity ÀÎ½ºÆåÅÍ¿¡¼­ ÇÒ´çÇÏ¼¼¿ä.");
+            Debug.LogError("StepManagerê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤! Unity ì¸ìŠ¤í™í„°ì—ì„œ í• ë‹¹í•˜ì„¸ìš”.");
         }
     }
 
     void Update()
     {
-        if (isLocked) return; // Ã¢¹®ÀÌ °íÁ¤µÈ »óÅÂ¸é ´õ ÀÌ»ó Update ½ÇÇà ¾È ÇÔ
+        if (isLocked) return; // ì°½ë¬¸ì´ ê³ ì •ëœ ìƒíƒœë©´ ë” ì´ìƒ Update ì‹¤í–‰ ì•ˆ í•¨
 
-        // »ç¿ëÀÚ°¡ Ã¢¹®À» ¿­´Ù°¡ ¼ÕÀ» ³õÀ¸¸é Z °ª È®ÀÎ ÈÄ ÀÌµ¿ ½ÇÇà
+        // ì‚¬ìš©ìê°€ ì°½ë¬¸ì„ ì—´ë‹¤ê°€ ì†ì„ ë†“ìœ¼ë©´ Z ê°’ í™•ì¸ í›„ ì´ë™ ì‹¤í–‰
         if (transform.position.z >= 4.19f && !hasMoved)
         {
             StartCoroutine(MoveWindowSmoothly());
-            hasMoved = true; // ÇÑ ¹ø¸¸ ½ÇÇàµÇµµ·Ï ¼³Á¤
+            hasMoved = true; // í•œ ë²ˆë§Œ ì‹¤í–‰ë˜ë„ë¡ ì„¤ì •
         }
     }
 
@@ -47,28 +46,26 @@ public class WindowAutoMove : MonoBehaviour
 
         while (elapsedTime < moveDuration)
         {
-            if (isLocked) yield break; // Ã¢¹®ÀÌ °íÁ¤µÇ¾úÀ¸¸é Áï½Ã ÄÚ·çÆ¾ Á¾·á
+            if (isLocked) yield break; // ì°½ë¬¸ì´ ê³ ì •ë˜ì—ˆìœ¼ë©´ ì¦‰ì‹œ ì½”ë£¨í‹´ ì¢…ë£Œ
             transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime / moveDuration);
             elapsedTime += Time.deltaTime;
-            yield return null; // ÇÑ ÇÁ·¹ÀÓ ±â´Ù¸²
+            yield return null; // í•œ í”„ë ˆì„ ê¸°ë‹¤ë¦¼
         }
 
-        transform.position = targetPosition; // ÀÌµ¿ÀÌ ³¡³ª¸é ÃÖÁ¾ À§Ä¡ º¸Á¤
-        LockWindow(); // Ã¢¹® °íÁ¤
+        transform.position = targetPosition; // ì´ë™ì´ ëë‚˜ë©´ ìµœì¢… ìœ„ì¹˜ ë³´ì •
+        LockWindow(); // ì°½ë¬¸ ê³ ì •
 
-        //ÀÌµ¿ÀÌ ³¡³­µÚ Ã¢¹®ÀÇ Àâ±â±â´É ¾Æ¿¹ »èÁ¦
-        Destroy(HandMoveObject);
-        Destroy(HandMoveObject_mirror);
+        
         transform.position = targetPosition;
 
-        //ÇÃ·¹ÀÌ¾î Çàµ¿ ¿Ï·á
+        //í”Œë ˆì´ì–´ í–‰ë™ ì™„ë£Œ
         if (stepManager != null)
         {
             stepManager.OnPlayerActionCompleted();
         }
         else
         {
-            Debug.LogError("StepManager¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("StepManagerë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
     }
     void LockWindow()
