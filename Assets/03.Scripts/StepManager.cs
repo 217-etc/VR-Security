@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class StepManager : MonoBehaviour
 {
@@ -33,6 +34,7 @@ public class StepManager : MonoBehaviour
             Debug.Log("모든 단계를 완료했습니다.");
             return;
         }
+        isPlayerActionCompleted = false;    //반드시 단계 시작 시 초기화
 
         StartStep(steps[currentStepIndex]);  // 새로운 단계 시작
         isStepInProgress = false;
@@ -136,8 +138,9 @@ public class StepManager : MonoBehaviour
     {
         // 10. 플레이어 행동 완료
         if (isPlayerActionCompleted) return;  // 이미 완료된 경우 실행 방지
-
-        Debug.Log("플레이어가 행동을 완료했습니다.");
+        Debug.LogWarning(" OnPlayerActionCompleted() 호출됨!");
+        Debug.LogWarning(Environment.StackTrace); // 🔍 누가 호출했는지 스택 출력
+        //Debug.Log("플레이어가 행동을 완료했습니다.");
         CompleteCurrentStep();
     }
 
