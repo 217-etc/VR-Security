@@ -7,6 +7,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public struct DialogueTextType
 {
@@ -47,6 +48,16 @@ public class DialogueManager : Singleton<DialogueManager>
         await ParseCSV();
         _animator = noticeUI.GetComponentInParent<Animator>();
         _audioSource = GetComponent<AudioSource>();
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     public async Task ParseCSV()
@@ -251,7 +262,7 @@ public class DialogueManager : Singleton<DialogueManager>
     IEnumerator PlayTTS(string data)
     {
         string ttsData = TTS_URL + data;
-        
+
         using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(ttsData, AudioType.MPEG))
         {
             yield return www.SendWebRequest();
@@ -278,5 +289,10 @@ public class DialogueManager : Singleton<DialogueManager>
     void OnPlayerAct()
     {
         _waitingForAction = false;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        noticeUI = GameObject.Find("Notice UI");
     }
 }
