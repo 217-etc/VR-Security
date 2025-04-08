@@ -6,89 +6,139 @@ using Oculus.Interaction.Grab;
 
 public class S2AutoMove : MonoBehaviour
 {
-    // 기존에 사용하던 요소들
+    private bool hasMoved = false; // S2가 한 번 이동했는지 체크
+    private bool halfMoved = false;
+    private bool hasDone = false; // S2가 두 번째 이동했는지 체크
+    private bool isLocked = false;
+    private float targetY1 = -2.0f;
+    private float targetY2 = -5.0f;
+    private float moveDuration = 1.0f;
+
     public GameObject HandMoveObject;
     public GameObject HandMoveObject_mirror;
     public StepManager stepManager;
+    public GameObject GaugeImage;
 
-    // 이동 관련 플래그
-    private bool hasMovedToYNeg7 = false;  // Phase 1 (y = -7) 수행 여부
-    private bool hasMovedToYNeg5 = false;  // Phase 2 (y = -5) 수행 여부
-    private bool isAutoMoving = false;     // 자동 이동 중 여부
+    public AudioClip sound1; // 재생할 AudioClip
+    private AudioSource audioSource; // AudioSource 변수 추가
 
-    // 이동 시간 및 목표 y 위치
-    public float moveDuration = 1.0f;
-    private float targetYPhase1 = -7f;  // Phase 1 목표 Y
-    private float targetYPhase2 = -5f;  // Phase 2 목표 Y
-
-    /// <summary>
-    /// 외부(다른 스크립트)에서 S2가 잡혔을 때 호출하여 Phase 1 이동(y = -7)을 시작합니다.
-    /// </summary>
-    public void TriggerPhase1Move()
+    void Start()
     {
-        if (!hasMovedToYNeg7 && !isAutoMoving)
-        {
-            StartCoroutine(MoveYPosition(targetYPhase1, false));
-            hasMovedToYNeg7 = true;
-        }
+        GaugeImage.SetActive(false); // 게이지 아직 안띄움 -> 나중에 단계 시작하면 띄우는 걸로 코드 수정
+        //stepManager = FindObjectOfType<StepManager>();
+        audioSource = gameObject.AddComponent<AudioSource>();
+        if (stepManager == null)
+        { Debug.LogError("StepManager가 할당되지 않았습니다! Unity 인스펙터에서 할당하세요."); }
     }
 
     void Update()
     {
-        // 자동 이동 중에는 다른 처리를 하지 않음
-        if (isAutoMoving)
-            return;
+        if (isLocked) return;
+        //Debug.Log("S2의 X축 회전값: " + transform.eulerAngles.y);
+        // (로컬) 시계 방향으로 돌렸을 때 359.5 -> 0 -> 90 -> 0 = 360 -> 270 -> 360 이지랄; 어디서 시작하는 회전값은 같음
+        // (글로벌) 반시계로 돌렸을 때 270->180->90->0->360->270(원래자리) -> 게이지는 글로벌 y축 기준으로 코드 작성하기
 
-        // [Phase 2] Phase 1 이후, 오브젝트가 회전되어(및 놓인 상태라고 가정) 로컬 x축 회전값이 -179 이하이면 실행
-        if (hasMovedToYNeg7 && !hasMovedToYNeg5)
+        // 일단 y축 위치가 -3보다 작으면 -3으로 이동
+        // 시작 회전값 -179.5 (395.5)
+        // 잡는 모션 -> 각도가 359보다 작아지면 = 잡고 좀이라도 움직이면
+        if (transform.localEulerAngles.x <=359.0f && transform.localPosition.y <= -3f && !hasMoved)
         {
-            float localX = transform.localEulerAngles.x;
-            if (localX > 180f)
-                localX -= 360f;
+            GaugeImage.SetActive(true); // 게이지 이미지 띄움
+            HandMoveObject.SetActive(false);
+            HandMoveObject_mirror.SetActive(false);
 
-            if (localX <= -179f)
-            {
-                StartCoroutine(MoveYPosition(targetYPhase2, true));
-                hasMovedToYNeg5 = true;
-            }
+            StartCoroutine(MoveS2Smoothly1());
+            hasMoved = true;
+        }
+
+        if (transform.localEulerAngles.x >= 269.0f && transform.localEulerAngles.x <= 271.0f)
+        {
+            halfMoved = true;
+            // Debug.Log("S2 절반 넘어감");
+        }
+
+        // y 위치가 -5보다 큼, x 회전값이 -15보다 큼, 한 번 움직인 적이 있으면
+        // 각도 콘솔 출력값: 359 -> 270 -> 359 -> 0+. x축 회전값 -179, -1로 시작했을 때 똑같음.
+        if (transform.localEulerAngles.x >= 340.0f && hasMoved && halfMoved)
+        {
+            StartCoroutine(MoveS2RotateToTarget(359.5f));
+        }
+
+        if (hasDone)
+        {
+            StartCoroutine(MoveS2Smoothly2());
         }
     }
 
-    /// <summary>
-    /// 오브젝트의 y축 위치를 부드럽게 targetY까지 이동시키는 코루틴.
-    /// isFinal이 true이면 Phase 2 완료 후 HandMoveObject들을 삭제하고 StepManager의 OnPlayerActionCompleted()를 호출합니다.
-    /// </summary>
-    /// <param name="targetY">목표 y 위치</param>
-    /// <param name="isFinal">Phase 2 완료 여부</param>
-    IEnumerator MoveYPosition(float targetY, bool isFinal)
+    IEnumerator MoveS2Smoothly1()
     {
-        isAutoMoving = true;
-
         float elapsedTime = 0f;
-        Vector3 startPosition = transform.position;
-        Vector3 targetPosition = new Vector3(startPosition.x, targetY, startPosition.z);
+        Vector3 S2startPosition = transform.localPosition;
+        Vector3 S2targetPosition = new Vector3(S2startPosition.x, targetY1, S2startPosition.z);
 
         while (elapsedTime < moveDuration)
         {
-            transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime / moveDuration);
+            if (isLocked) yield break;
+            transform.localPosition = Vector3.Lerp(S2startPosition, S2targetPosition, elapsedTime / moveDuration);
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-        transform.position = targetPosition;
 
-        if (isFinal)
+        transform.localPosition = S2targetPosition;
+        HandMoveObject.SetActive(true);
+        HandMoveObject_mirror.SetActive(true);
+    }
+
+    IEnumerator MoveS2Smoothly2()
+    {
+        Destroy(HandMoveObject);
+        Destroy(HandMoveObject_mirror);
+
+        float elapsedTime = 0f;
+        Vector3 S2startPosition2 = transform.localPosition;
+        Vector3 S2targetPosition2 = new Vector3(S2startPosition2.x, targetY2, S2startPosition2.z);
+
+        while (elapsedTime < moveDuration)
         {
-            if (HandMoveObject != null)
-                Destroy(HandMoveObject);
-            if (HandMoveObject_mirror != null)
-                Destroy(HandMoveObject_mirror);
-
-            if (stepManager != null)
-                stepManager.OnPlayerActionCompleted();
-            else
-                Debug.LogError("StepManager가 할당되지 않았습니다.");
+            if (isLocked) yield break;
+            transform.localPosition = Vector3.Lerp(S2startPosition2, S2targetPosition2, elapsedTime / moveDuration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
         }
 
-        isAutoMoving = false;
+        transform.localPosition = S2targetPosition2; 
+        LockWindow();
+    }
+
+    IEnumerator MoveS2RotateToTarget(float targetXRotation)
+    {
+        float elapsedTime = 0f;
+        float moveDuration = 1.0f;
+        float startXRotation = transform.localEulerAngles.x;
+
+        while (elapsedTime < moveDuration)
+        {
+            if (isLocked) yield break;
+
+            float newXRotation = Mathf.Lerp(startXRotation, targetXRotation, elapsedTime / moveDuration);
+            transform.localEulerAngles = new Vector3(newXRotation, transform.localEulerAngles.y, transform.localEulerAngles.z);
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.localEulerAngles = new Vector3(targetXRotation, transform.localEulerAngles.y, transform.localEulerAngles.z);
+        hasDone = true;
+    }
+
+    void LockWindow()
+    {
+        isLocked = true;
+        if (audioSource != null && sound1 != null)
+        {
+            audioSource.clip = sound1;
+            audioSource.Play();
+        }
+        GaugeImage.SetActive(false);
     }
 }
