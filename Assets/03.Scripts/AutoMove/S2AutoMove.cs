@@ -10,19 +10,21 @@ public class S2AutoMove : MonoBehaviour
     private bool halfMoved = false;
     private bool hasDone = false; // S2가 두 번째 이동했는지 체크
     private bool isLocked = false;
-    private float targetY1 = -2.0f; // 첫 목표 Y
-    private float targetY2 = -5.0f; // 두 번째 목표 Y
+    private float targetY1 = -2.0f;
+    private float targetY2 = -5.0f;
     private float moveDuration = 1.0f;
 
     public GameObject HandMoveObject;
     public GameObject HandMoveObject_mirror;
     public StepManager stepManager;
+    public GameObject GaugeImage;
 
     public AudioClip sound1; // 재생할 AudioClip
     private AudioSource audioSource; // AudioSource 변수 추가
 
     void Start()
     {
+        GaugeImage.SetActive(false); // 게이지 아직 안띄움 -> 나중에 단계 시작하면 띄우는 걸로 코드 수정
         //stepManager = FindObjectOfType<StepManager>();
         audioSource = gameObject.AddComponent<AudioSource>();
         if (stepManager == null)
@@ -32,21 +34,21 @@ public class S2AutoMove : MonoBehaviour
     void Update()
     {
         if (isLocked) return;
-        // Debug.Log("S2의 X축 회전값: " + transform.localEulerAngles.x + " / S2 y축 위치: " + transform.localPosition.y);
+        //Debug.Log("S2의 X축 회전값: " + transform.eulerAngles.y);
+        // (로컬) 시계 방향으로 돌렸을 때 359.5 -> 0 -> 90 -> 0 = 360 -> 270 -> 360 이지랄; 어디서 시작하는 회전값은 같음
+        // (글로벌) 반시계로 돌렸을 때 270->180->90->0->360->270(원래자리) -> 게이지는 글로벌 y축 기준으로 코드 작성하기
 
         // 일단 y축 위치가 -3보다 작으면 -3으로 이동
         // 시작 회전값 -179.5 (395.5)
         // 잡는 모션 -> 각도가 359보다 작아지면 = 잡고 좀이라도 움직이면
         if (transform.localEulerAngles.x <=359.0f && transform.localPosition.y <= -3f && !hasMoved)
         {
+            GaugeImage.SetActive(true); // 게이지 이미지 띄움
             HandMoveObject.SetActive(false);
             HandMoveObject_mirror.SetActive(false);
 
             StartCoroutine(MoveS2Smoothly1());
             hasMoved = true;
-
-            HandMoveObject.SetActive(true);
-            HandMoveObject_mirror.SetActive(true);
         }
 
         if (transform.localEulerAngles.x >= 269.0f && transform.localEulerAngles.x <= 271.0f)
@@ -57,7 +59,6 @@ public class S2AutoMove : MonoBehaviour
 
         // y 위치가 -5보다 큼, x 회전값이 -15보다 큼, 한 번 움직인 적이 있으면
         // 각도 콘솔 출력값: 359 -> 270 -> 359 -> 0+. x축 회전값 -179, -1로 시작했을 때 똑같음.
-        // 근데 1로 시작하면 넘어가는 순간 360도 돼버려서 끝나고, 반대쪽으로 돌리면 1 -> 90 -> 1- 돼서 또 똑같음;;;;
         if (transform.localEulerAngles.x >= 340.0f && hasMoved && halfMoved)
         {
             StartCoroutine(MoveS2RotateToTarget(359.5f));
@@ -84,6 +85,8 @@ public class S2AutoMove : MonoBehaviour
         }
 
         transform.localPosition = S2targetPosition;
+        HandMoveObject.SetActive(true);
+        HandMoveObject_mirror.SetActive(true);
     }
 
     IEnumerator MoveS2Smoothly2()
@@ -124,7 +127,6 @@ public class S2AutoMove : MonoBehaviour
             yield return null;
         }
 
-        // 최종 회전값 보정
         transform.localEulerAngles = new Vector3(targetXRotation, transform.localEulerAngles.y, transform.localEulerAngles.z);
         hasDone = true;
     }
@@ -137,5 +139,6 @@ public class S2AutoMove : MonoBehaviour
             audioSource.clip = sound1;
             audioSource.Play();
         }
+        GaugeImage.SetActive(false);
     }
 }

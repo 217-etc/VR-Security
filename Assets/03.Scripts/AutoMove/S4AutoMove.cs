@@ -36,14 +36,14 @@ public class S4AutoMove : MonoBehaviour
     void Update()
     {
         bool S3Moved = s3AutoMove != null && s3AutoMove.GetS3Moved(); // 할당 잘 됨
-        Debug.Log("S4의 y축 회전값: " + transform.localEulerAngles.y);
+        // Debug.Log("S4의 y축 회전값: " + transform.localEulerAngles.y);
 
         // S41Move: 물체를 잡으면 (y축 회전값이 0.5도보다 커지면) → x축 0으로 자동 이동 후 (올리기) 그랩 비활성화 + S41Moved = true
         if (!S41Moved && transform.localEulerAngles.y >= 0.1f)
         {
             DeactivateHandMoveObjects();
             StartCoroutine(MoveToPosition(new Vector3(0f, transform.localPosition.y, transform.localPosition.z), false));
-            prePosY = transform.localEulerAngles.y; // 현재 y축 회전값 업데이트
+            prePosY = transform.localEulerAngles.y; 
         }
 
         if(S3Moved && S41Moved && !actOnce) { 
@@ -52,15 +52,12 @@ public class S4AutoMove : MonoBehaviour
         }
 
         // S3Moved와 S41Moved가 모두 참이고 S4를 다시 잡으면 → 자동으로 x축 위치 1.5까지 이동 후 (내리기) 그랩 활성화
-        // 오류: S3 움직임 완료되지마자 S42 자동으로 움직임, 그러고나서 그랩 활성화 안됨
-        // 오류: 이거 끝나고 갑자기 90으로 순간이동
-        // 오류: S42 이동하고 그랩 활성화 안됨. 행동완료는 안떴음
         // 오류: S42 이동하고 그랩 활성화는 됨. 근데 S3 직후 S4 자동실행.
         if (S3Moved && S41Moved && transform.localEulerAngles.y > prePosY + 1.0f)
         {
             StartCoroutine(MoveToPosition(new Vector3(1.5f, transform.localPosition.y, transform.localPosition.z), true));
             S42Moved = true;
-            Debug.Log("S42Moved");
+            // Debug.Log("S42Moved");
         }
 
         // S3Moved, S41Moved가 모두 참이고 S4의 y축 회전값이 85도보다 크면 → 그랩 비활성화 후 스텝매니저 호출
