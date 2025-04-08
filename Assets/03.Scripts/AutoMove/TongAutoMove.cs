@@ -17,6 +17,8 @@ public class TongAutoMove : MonoBehaviour
 
     public StepManager stepManager;
 
+    [SerializeField] private List<Rigidbody> _toolRigidbody = new List<Rigidbody>();
+
     void Start()
     {
         if (stepManager == null)
