@@ -11,9 +11,14 @@ public class StepManager : MonoBehaviour
     private bool isPlayerActionCompleted = false;  // 플레이어 행동 완료 여부
     private bool isStepInProgress = false;  // 중복 실행 방지용 플래그
 
+    [SerializeField] GameObject _noticeUI;
+
 
     void Start()
     {
+        DialogueManager.Instance.noticeUI = _noticeUI;
+        DialogueManager.Instance._animator = _noticeUI.GetComponent<Animator>();
+
         NextStep();  // 첫 번째 단계 시작
     }
 
