@@ -43,6 +43,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _FresnelPower: 2.5
+    - _QueueControl: 0
     m_Colors:
     - _FresenelColor: {r: 0, g: 1, b: 0.8784314, a: 1}
   m_BuildTextureStacks: []
