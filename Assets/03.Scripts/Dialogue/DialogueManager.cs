@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -27,11 +26,11 @@ public class DialogueManager : Singleton<DialogueManager>
     //딕셔너리 생성하기
     public Dictionary<string, DialogueStructure> dialougeDictionary = new Dictionary<string, DialogueStructure>();
     public GameObject noticeUI; // 안내문 UI
-    private Animator _animator; // 안내문 Animator
+    public Animator _animator; // 안내문 Animator
     private AudioSource _audioSource;
 
     public bool isDialogueActive = false;
-    public float autoDialgoueDuration = 2f;
+    public float autoDialgoueDuration = 0.5f;
     private string _currentKey;
     private int _currentIndex = 0;
     public Action ShowNext;
@@ -45,7 +44,6 @@ public class DialogueManager : Singleton<DialogueManager>
     async void Start()
     {
         await ParseCSV();
-        _animator = noticeUI.GetComponentInParent<Animator>();
         _audioSource = GetComponent<AudioSource>();
     }
 
@@ -192,7 +190,7 @@ public class DialogueManager : Singleton<DialogueManager>
                     _animator.SetTrigger("NoticeDisappear");
                 }
             }
-            StartCoroutine(PlayTTS(ChangeStringForTTS(text)));
+            yield return StartCoroutine(PlayTTS(ChangeStringForTTS(text)));
 
             Debug.LogWarning($"대사의 행동 타입 : {dialogueStructure.dialogues[_currentIndex].display_behaviour}");
             // 타입이 auto면
@@ -251,7 +249,7 @@ public class DialogueManager : Singleton<DialogueManager>
     IEnumerator PlayTTS(string data)
     {
         string ttsData = TTS_URL + data;
-        
+
         using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(ttsData, AudioType.MPEG))
         {
             yield return www.SendWebRequest();
