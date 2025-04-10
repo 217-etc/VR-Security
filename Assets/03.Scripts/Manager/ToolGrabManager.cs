@@ -37,7 +37,12 @@ public class ToolGrabManager : MonoBehaviour
     public void GrabTool(string toolName)
     {
         _toolGrabDictionary[toolName] = true;
-        Debug.Log($"{toolName} µµ±¸¸¦ ÁıÀ½.");
+        Debug.Log($"{toolName} ë„êµ¬ë¥¼ ì§‘ìŒ.");
+    }
+
+    public bool IsGrabEnd(string toolName)
+    {
+        return _toolGrabDictionary[toolName];
     }
 
     private bool CheckAllTrue()
@@ -51,6 +56,6 @@ public class ToolGrabManager : MonoBehaviour
 
     private void ExecuteResult()
     {
-        Debug.Log("¸ğµç ¿Ï°­±â µµ±¸¸¦ ÁıÀ½");
+        Debug.Log("ëª¨ë“  ì™„ê°•ê¸° ë„êµ¬ë¥¼ ì§‘ìŒ");
     }
 }
