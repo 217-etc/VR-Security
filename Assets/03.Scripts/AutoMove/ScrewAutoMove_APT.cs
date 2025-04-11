@@ -26,7 +26,6 @@ public class ScrewAutoMove_APT : MonoBehaviour
     {
         initialPosition = transform.position;
         lastRotationY = transform.localEulerAngles.y;  // 초기값 설정
-
     }
 
     void Update()
@@ -105,8 +104,9 @@ public class ScrewAutoMove_APT : MonoBehaviour
         // 3번 회전하면 고정
         if (rotateCount >= 3)
         {
+            SoundManager.Instance.PlaySFX("Link");
+            stepManager.OnPlayerActionCompleted();
             isLocked = true;
-            stepManager?.OnPlayerActionCompleted();
         }
     }
 

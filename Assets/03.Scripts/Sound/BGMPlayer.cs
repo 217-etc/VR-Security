@@ -13,6 +13,5 @@ public class BGMPlayer : MonoBehaviour
     {
         SoundManager.Instance.PlayBGM("FireTruck1");
         SoundManager.Instance.PlayBGM("FireTruck2");
-        SoundManager.Instance.PlayBGM("Wind");
     }
 }

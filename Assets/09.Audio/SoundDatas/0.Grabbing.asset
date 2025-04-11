@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc4d78e5b779a514eaf765e3b98b4363, type: 3}
-  m_Name: 3-3.Window
+  m_Name: 0.Grabbing
   m_EditorClassIdentifier: 
-  soundName: 3-3.Window
-  clip: {fileID: 8300000, guid: 09064c4bf148b4541a70a86f196b99a6, type: 3}
-  volume: 0.8
+  soundName: 0.Grabbing
+  clip: {fileID: 8300000, guid: 34e5714c2d7484348938a17911df71d2, type: 3}
+  volume: 1
   loop: 0

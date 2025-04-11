@@ -8,6 +8,7 @@ public class TongAutoMove : MonoBehaviour
 {
     private bool hasRotated = false; // 이미 이동했는지 체크
     private bool isLocked = false; // 목표 각도에 도달했는지 체크
+    private bool isOpen = false;
     private float targetRotation = -90f; // 목표 회전각도
     private float moveDuration = 1.0f; // 이동하는 데 걸리는 시간
     private float rotationThreshold = -60f; // 자동 회전 트리거 각도
@@ -32,7 +33,9 @@ public class TongAutoMove : MonoBehaviour
         if (isLocked) return; // 이미 목표에 도달했다면 실행 X
 
         float angleX = transform.localEulerAngles.x;
-        if (angleX > 180f) angleX -= 360f; // 360도를 넘어가면 -값으로 변환
+        if (angleX > 180f) angleX -= 360f; // 180도를 넘어가면 -값으로 변환
+
+        if(transform.localEulerAngles.x > 0 && !isOpen) { SoundManager.Instance.PlaySFX("4-1.Tong"); isOpen = true; }
 
         // 사용자가 통을 열다가 손을 놓았을 때, 특정 각도 이하인지 확인 후 자동 복귀
         if (angleX <= rotationThreshold && !hasRotated)

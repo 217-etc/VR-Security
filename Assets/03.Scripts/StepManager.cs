@@ -143,6 +143,7 @@ public class StepManager : MonoBehaviour
     {
         // 10. 플레이어 행동 완료
         if (isPlayerActionCompleted) return;  // 이미 완료된 경우 실행 방지
+        SoundManager.Instance.PlaySFX("0.Suc_bell");
         Debug.LogWarning(" OnPlayerActionCompleted() 호출됨!");
         Debug.LogWarning(Environment.StackTrace); // 🔍 누가 호출했는지 스택 출력
         //Debug.Log("플레이어가 행동을 완료했습니다.");
@@ -152,6 +153,7 @@ public class StepManager : MonoBehaviour
     // 물체를 Grab했을 때
     public void WhenGrabbedObject()
     {
+        SoundManager.Instance.PlaySFX("0.Grabbing");
         if (currentStepIndex >= 0 && currentStepIndex < steps.Count)
         {
             Transform[] children = steps[currentStepIndex].target.GetComponentsInChildren<Transform>(true);
