@@ -105,8 +105,8 @@ public class ScrewAutoMove_APT : MonoBehaviour
         if (rotateCount >= 3)
         {
             SoundManager.Instance.PlaySFX("Link");
-            stepManager.OnPlayerActionCompleted();
             isLocked = true;
+            stepManager?.OnPlayerActionCompleted();
         }
     }
 
