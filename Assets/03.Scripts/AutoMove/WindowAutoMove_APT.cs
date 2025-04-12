@@ -9,6 +9,7 @@ public class WindowAutoMove_APT : MonoBehaviour
 {
     private bool hasMoved = false; // 창문이 이미 이동했는지 체크
     private bool isLocked = false; // 창문이 목표에 도달했는지 체크
+    private bool isPlayed = false; // 바람 소리가 재생됐는지 확인
     // private float targetX = 17.547f; // 목표 X 위치
     private float targetX = 13.59712f; // 목표 X 위치
     private float moveDuration = 1.0f; // 이동하는 데 걸리는 시간
@@ -27,6 +28,14 @@ public class WindowAutoMove_APT : MonoBehaviour
     void Update()
     {
         if (isLocked) return; // 창문이 고정된 상태면 더 이상 Update 실행 안 함
+
+        //Debug.Log("창문 x축 위치: " + transform.position.x);
+
+        /* if(transform.position.x <= 14.0f && !isPlayed)
+        {
+            SoundManager.Instance.PlayBGM("Wind");
+            isPlayed = true;
+        }*/
 
         // 사용자가 창문을 열다가 손을 놓으면 X 값 확인 후 이동 실행
         if (transform.position.x <= 13.9f && !hasMoved)
@@ -51,11 +60,11 @@ public class WindowAutoMove_APT : MonoBehaviour
             yield return null; // 한 프레임 기다림
         }
 
+        SoundManager.Instance.PlaySFX("3-3.Window");
         transform.position = targetPosition; // 이동이 끝나면 최종 위치 보정
         LockWindow(); // 창문 고정
-
         
-        transform.position = targetPosition;
+        // transform.position = targetPosition;
 
         //플레이어 행동 완료
         if (stepManager != null)

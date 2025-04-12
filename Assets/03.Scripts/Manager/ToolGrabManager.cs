@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ToolGrabManager : MonoBehaviour
 {
+    public StepManager stepManager;
     public List<string> toolNameList = new List<string>();
     private Dictionary<string,bool> _toolGrabDictionary = new Dictionary<string,bool>();
     private bool _isComplete = false;
@@ -23,11 +24,13 @@ public class ToolGrabManager : MonoBehaviour
         if (!_isComplete)
         {
             _isComplete = CheckAllTrue();
+            Debug.Log($"통 : [체크] 현재 상태: {_isComplete}");
         }
         else
         {
             if (!_isEnd)
             {
+                Debug.Log("통 : [성공] ExecuteResult 실행");
                 ExecuteResult();
                 _isEnd = true;
             }
@@ -36,8 +39,17 @@ public class ToolGrabManager : MonoBehaviour
 
     public void GrabTool(string toolName)
     {
-        _toolGrabDictionary[toolName] = true;
-        Debug.Log($"{toolName} 도구를 집음.");
+        //_toolGrabDictionary[toolName] = true;
+        //Debug.Log($"{toolName} 도구를 집음.");
+        if (_toolGrabDictionary.ContainsKey(toolName))
+        {
+            _toolGrabDictionary[toolName] = true;
+            Debug.Log($"통 : {toolName} 도구를 집음.");
+        }
+        else
+        {
+            Debug.LogError($"통 : {toolName} 은(는) toolGrabDictionary에 존재하지 않음!");
+        }
     }
 
     public bool IsGrabEnd(string toolName)
@@ -47,15 +59,21 @@ public class ToolGrabManager : MonoBehaviour
 
     private bool CheckAllTrue()
     {
-        foreach (bool value in _toolGrabDictionary.Values)
+        foreach (KeyValuePair<string, bool> pair in _toolGrabDictionary)
         {
-            if (!value) return false;
+            Debug.Log($"[도구 체크] {pair.Key} = {pair.Value}");
+            if (!pair.Value) return false;
         }
         return true;
     }
 
     private void ExecuteResult()
     {
-        Debug.Log("모든 완강기 도구를 집음");
+        if (stepManager == null)
+        {
+            Debug.LogError("통 : [에러] stepManager가 null입니다!");
+        }
+        Debug.Log("통 : 모든 완강기 도구를 집음");
+        stepManager?.OnPlayerActionCompleted();
     }
 }

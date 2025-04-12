@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   soundName: 3-3.Window
   clip: {fileID: 8300000, guid: 09064c4bf148b4541a70a86f196b99a6, type: 3}
-  volume: 1
+  volume: 0.8
   loop: 0
