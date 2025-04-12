@@ -41,10 +41,36 @@ public class DialogueManager : Singleton<DialogueManager>
     public GameObject loadingUI;
     public GameObject selectUI;
 
+    // 관절
+    public OVRHand ovrHand; // OVRHand 참조
+    public OVRSkeleton ovrSkeleton; // OVRSkeleton 참조
+
+    public Dictionary<string, Transform> boneTransforms = new Dictionary<string, Transform>();
+    public Transform wristTransform; // 손목 Transform
+
+    public GameObject debugSpherePrefab;
+    public Dictionary<string, GameObject> debugSpheres = new Dictionary<string, GameObject>();
+    public bool isInitializeComplete = false;
+    public GameObject boneParent;
+
     async void Start()
     {
         await ParseCSV();
         _audioSource = GetComponent<AudioSource>();
+    }
+
+    private void Update()
+    {
+        if (!isInitializeComplete || DialogueManager.Instance.boneTransforms.Count == 0 || DialogueManager.Instance.wristTransform == null) return;
+
+        // 디버그 Sphere 위치 업데이트 (손가락 관절을 따라감)
+        foreach (var key in DialogueManager.Instance.boneTransforms.Keys)
+        {
+            if (DialogueManager.Instance.debugSpheres.ContainsKey(key))
+            {
+                DialogueManager.Instance.debugSpheres[key].transform.position = DialogueManager.Instance.boneTransforms[key].position;
+            }
+        }
     }
 
     public async Task ParseCSV()
@@ -118,6 +144,52 @@ public class DialogueManager : Singleton<DialogueManager>
                 dialogues = currentDialogues.ToArray()
             };
         }
+
+        // 관절 값 다 읽어오기
+        while (ovrSkeleton.Bones == null || ovrSkeleton.Bones.Count == 0)
+        {
+            await Task.Yield();
+        }
+
+        // 손가락 이름 리스트 (Pinky 대신 Little 사용)
+        string[] fingerNames = { "Thumb", "Index", "Middle", "Ring", "Little" };
+
+        foreach (var bone in ovrSkeleton.Bones)
+        {
+            string boneName = bone.Transform.name; // Transform의 실제 이름 가져오기
+
+            foreach (var finger in fingerNames)
+            {
+                if (boneName == $"XRHand_{finger}Proximal") // Base 관절
+                {
+                    boneTransforms[$"{finger}_Base"] = bone.Transform;
+                }
+                else if (boneName == $"XRHand_{finger}Tip") // Tip 손끝
+                {
+                    boneTransforms[$"{finger}_Tip"] = bone.Transform;
+                }
+                else if (boneName == "XRHand_Wrist") // 손목
+                {
+                    wristTransform = bone.Transform;
+                }
+            }
+        }
+
+        // 디버그 Sphere 생성 및 매핑
+        foreach (var boneKey in boneTransforms.Keys)
+        {
+            Transform boneTransform = DialogueManager.Instance.boneTransforms[boneKey];
+
+            if (boneTransform != null)
+            {
+                GameObject debugSphere = Instantiate(debugSpherePrefab, boneTransform.position, Quaternion.identity);
+                debugSphere.transform.parent = boneParent.transform;
+                debugSphere.transform.localScale = Vector3.one * 0.02f; // Sphere 크기 조정
+                debugSpheres[boneKey] = debugSphere;
+            }
+        }
+        isInitializeComplete = true;
+        await Task.Yield();
 
         Debug.LogWarning("CSV 데이터 파싱 완료! 대사 개수: " + dialougeDictionary.Count);
         loadingUI.SetActive(false);
