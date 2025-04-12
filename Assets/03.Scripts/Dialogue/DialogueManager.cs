@@ -40,6 +40,7 @@ public class DialogueManager : Singleton<DialogueManager>
     public TextMeshProUGUI progressText;
     public GameObject loadingUI;
     public GameObject selectUI;
+    private bool isParsingComplete = false;
 
     // 관절
     public OVRHand ovrHand; // OVRHand 참조
@@ -126,12 +127,6 @@ public class DialogueManager : Singleton<DialogueManager>
             {
                 currentDialogues.Add(new DialogueTextType { text = text, display_behaviour = displayBehaviour, only_audio = onlyAudio });
             }
-
-            // 진행 상태 업데이트
-            float progress = (float)(i - 6) / totalLines;
-            loadingUI.GetComponent<Slider>().value = progress;
-            progressText.text = $"{(progress * 100):F1}%";
-
             await Task.Delay(10);
         }
 
@@ -144,6 +139,8 @@ public class DialogueManager : Singleton<DialogueManager>
                 dialogues = currentDialogues.ToArray()
             };
         }
+        isParsingComplete = false;
+        StartCoroutine(VisualLoadingCoroutine(() => isParsingComplete));
 
         // 관절 값 다 읽어오기
         while (ovrSkeleton.Bones == null || ovrSkeleton.Bones.Count == 0)
@@ -194,6 +191,27 @@ public class DialogueManager : Singleton<DialogueManager>
         Debug.LogWarning("CSV 데이터 파싱 완료! 대사 개수: " + dialougeDictionary.Count);
         loadingUI.SetActive(false);
         selectUI.SetActive(true);
+    }
+
+    public IEnumerator VisualLoadingCoroutine(System.Func<bool> isCompleteCheck)
+    {
+        float progress = 0f;
+
+        while (!isCompleteCheck())
+        {
+            progress = Mathf.Min(progress + Time.deltaTime * 0.3f, 0.95f);
+            loadingUI.GetComponent<Slider>().value = progress;
+            progressText.text = $"{(progress * 100f):F1}%";
+            yield return null;
+        }
+
+        while (progress < 1f)
+        {
+            progress = Mathf.Min(progress + Time.deltaTime * 1f, 1f);
+            loadingUI.GetComponent<Slider>().value = progress;
+            progressText.text = $"{(progress * 100f):F1}%";
+            yield return null;
+        }
     }
 
     private async Task<string> FetchGoogleSheetData(string url)

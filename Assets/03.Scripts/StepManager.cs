@@ -5,32 +5,32 @@ using System;
 
 public class StepManager : MonoBehaviour
 {
-    public StepUIManager stepUI; // UI 매니저 연결
-    public List<Step> steps = new List<Step>();  // 모든 단계 정보 저장
-    private int currentStepIndex = -1;  // 현재 단계 인덱스 (-1부터 시작)
-    private bool isPlayerActionCompleted = false;  // 플레이어 행동 완료 여부
-    private bool isStepInProgress = false;  // 중복 실행 방지용 플래그
+    public StepUIManager stepUI;
+    public List<Step> steps = new List<Step>();
+    private int currentStepIndex = -1;
+    private bool isPlayerActionCompleted = false;
+    private bool isStepInProgress = false;
 
     [SerializeField] GameObject _noticeUI;
-
 
     void Start()
     {
         DialogueManager.Instance.noticeUI = _noticeUI;
         DialogueManager.Instance._animator = _noticeUI.GetComponent<Animator>();
 
-        NextStep();  // 첫 번째 단계 시작
+        NextStep();
     }
 
     void NextStep()
     {
-        if (isStepInProgress) return;  // 중복 실행 방지
+        if (isStepInProgress) return;
         isStepInProgress = true;
 
+        /*
         if (currentStepIndex >= 0 && currentStepIndex < steps.Count)
         {
             EndStep(steps[currentStepIndex]);  // 이전 단계 정리
-        }
+        }*/
 
         currentStepIndex++;
 
@@ -39,9 +39,9 @@ public class StepManager : MonoBehaviour
             Debug.Log("모든 단계를 완료했습니다.");
             return;
         }
-        isPlayerActionCompleted = false;    //반드시 단계 시작 시 초기화
 
-        StartStep(steps[currentStepIndex]);  // 새로운 단계 시작
+        isPlayerActionCompleted = false;
+        StartStep(steps[currentStepIndex]);
         isStepInProgress = false;
     }
 
@@ -49,7 +49,7 @@ public class StepManager : MonoBehaviour
     {
         Debug.Log($"현재 단계: {step.stepName}");
 
-        isPlayerActionCompleted = false;  // 새로운 단계에서 플레이어 행동 초기화
+        isPlayerActionCompleted = false;
 
         if (stepUI == null)
         {
@@ -62,36 +62,30 @@ public class StepManager : MonoBehaviour
 
         foreach (GameObject obj in step.target)
         {
-            // 1. 아웃라인 켜기
             Outline outline = obj?.GetComponentInChildren<Outline>();
-            if (outline != null)
-            {
-                outline.enabled = true;
-            }
+            if (outline != null) outline.enabled = true;
 
-            // 2. HandGrabInteractable / GuideHand 활성화
-            Transform child = obj.GetComponentInChildren<Transform>(true);
-            if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
+            Transform[] children = obj.GetComponentsInChildren<Transform>(true);
+            foreach (Transform child in children)
             {
-                child.gameObject.SetActive(true);
-            }
+                if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
+                {
+                    child.gameObject.SetActive(true);
+                }
 
-            if (child.name.Contains("GuideHand"))
-            {
-                child.gameObject.SetActive(true);
+                if (child.name.Contains("GuideHand"))
+                {
+                    child.gameObject.SetActive(true);
+                }
             }
         }
 
-        // 3. UI & 음성 활성화
         DialogueManager.Instance.StartDialogue(step.dialogueKey);
 
-        // 4. 게이지 UI 활성화
         if (step.gaugeUI != null)
         {
-            //Debug.Log("고리게이지 활성화~");
             step.gaugeUI.SetActive(true);
         }
-
     }
 
     void EndStep(Step step)
@@ -100,14 +94,9 @@ public class StepManager : MonoBehaviour
 
         foreach (GameObject obj in step.target)
         {
-            // 6. 아웃라인 끄기
             Outline outline = obj?.GetComponentInChildren<Outline>();
-            if (outline != null)
-            {
-                outline.enabled = false;
-            }
+            if (outline != null) outline.enabled = false;
 
-            // 7. HandGrabInteractable / GuideHand 비활성화
             Transform[] children = obj.GetComponentsInChildren<Transform>(true);
             foreach (Transform child in children)
             {
@@ -118,38 +107,68 @@ public class StepManager : MonoBehaviour
             }
         }
 
-        // 8. UI & 음성 활성화
         DialogueManager.Instance.ShowNext?.Invoke();
 
-        // 9. 게이지 UI 비활성화
-        if (step.gaugeUI != null)
-        {
-            step.gaugeUI.SetActive(false);
-        }
+        // 게이지 UI 비활성화는 WaitForDialogueThenProceed에서
     }
 
     public void CompleteCurrentStep()
     {
-        if (isPlayerActionCompleted) return;  // 중복 실행 방지
+        if (isPlayerActionCompleted) return;
         isPlayerActionCompleted = true;
 
-        Debug.Log("현재 단계 완료. 다음 단계로 이동합니다.");
-
-        Invoke(nameof(NextStep), 0.1f);  // 약간의 딜레이 후 실행 (혹시 모를 중복 호출 방지)
+        StartCoroutine(WaitForDialogueThenProceed());
     }
 
-    public void OnPlayerActionCompleted() // 해당 함수는 다른 스크립트에서 플레이어 행동이 완료될시 호출
+    private IEnumerator WaitForDialogueThenProceed()
     {
-        // 5. 플레이어 행동 완료
-        if (isPlayerActionCompleted) return;  // 이미 완료된 경우 실행 방지
+        // 대사 진행 중이면 대기
+        while (DialogueManager.Instance != null && DialogueManager.Instance.isDialogueActive)
+        {
+            yield return null;
+        }
+
+        // 게이지 UI 비활성화
+        Step step = steps[currentStepIndex];
+        if (step.gaugeUI != null)
+        {
+            step.gaugeUI.SetActive(false);
+        }
+
+        // 다음 단계로 이동
+        Invoke(nameof(NextStep), 0.1f);
+    }
+
+    public void OnPlayerActionCompleted()
+    {
+        if (isPlayerActionCompleted) return;
+
         SoundManager.Instance.PlaySFX("0.Suc_bell");
         Debug.LogWarning(" OnPlayerActionCompleted() 호출됨!");
-        Debug.LogWarning(Environment.StackTrace); // 누가 호출했는지 스택 출력
-        //Debug.Log("플레이어가 행동을 완료했습니다.");
+        Debug.LogWarning(Environment.StackTrace);
+
+        // 아웃라인/HandGrab 비활성화 처리 & 대사 실행
+        /*Step step = steps[currentStepIndex];
+        foreach (GameObject obj in step.target)
+        {
+            Outline outline = obj?.GetComponentInChildren<Outline>();
+            if (outline != null) outline.enabled = false;
+
+            Transform[] children = obj.GetComponentsInChildren<Transform>(true);
+            foreach (Transform child in children)
+            {
+                if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        DialogueManager.Instance.ShowNext?.Invoke();*/
+        EndStep(steps[currentStepIndex]);
         CompleteCurrentStep();
     }
 
-    // 물체를 Grab했을 때
     public void WhenGrabbedObject()
     {
         SoundManager.Instance.PlaySFX("0.Grabbing");

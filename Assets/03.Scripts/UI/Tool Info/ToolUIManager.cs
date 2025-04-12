@@ -19,10 +19,12 @@ public class ToolUIManager : MonoBehaviour
         toolGrabManager.GrabTool(toolName);
 
 
+        /*
         // Rigidbody 키네틱 해제
         Debug.LogWarning($"키네틱 값 변경 전 : {GetComponent<Rigidbody>().isKinematic}");
         GetComponent<Rigidbody>().isKinematic = false;
         Debug.LogWarning($"키네틱 값 변경 후 : {GetComponent<Rigidbody>().isKinematic}");
         GetComponent<Rigidbody>().useGravity = true;
+        */
     }
 }
