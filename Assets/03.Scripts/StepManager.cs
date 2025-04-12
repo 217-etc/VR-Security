@@ -70,18 +70,15 @@ public class StepManager : MonoBehaviour
             }
 
             // 2. HandGrabInteractable / GuideHand 활성화
-            Transform[] children = obj.GetComponentsInChildren<Transform>(true);
-            foreach (Transform child in children)
+            Transform child = obj.GetComponentInChildren<Transform>(true);
+            if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
             {
-                if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
-                {
-                    child.gameObject.SetActive(true);
-                }
+                child.gameObject.SetActive(true);
+            }
 
-                if (child.name.Contains("GuideHand"))
-                {
-                    child.gameObject.SetActive(true);
-                }
+            if (child.name.Contains("GuideHand"))
+            {
+                child.gameObject.SetActive(true);
             }
         }
 
