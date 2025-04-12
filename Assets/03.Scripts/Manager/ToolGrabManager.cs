@@ -10,7 +10,10 @@ public class ToolGrabManager : MonoBehaviour
     private bool _isComplete = false;
     private bool _isEnd = false;
 
-    
+    //데모용
+    public GameObject supporter1;
+    public GameObject demoObject;
+
     void Awake()
     {
         foreach (string toolName in toolNameList)
@@ -74,6 +77,17 @@ public class ToolGrabManager : MonoBehaviour
             Debug.LogError("통 : [에러] stepManager가 null입니다!");
         }
         Debug.Log("통 : 모든 완강기 도구를 집음");
-        stepManager?.OnPlayerActionCompleted();
+
+        StartCoroutine(DelayAction());
+    }
+    private IEnumerator DelayAction()
+    {
+        yield return new WaitForSeconds(4f); // 4초 대기
+        stepManager.OnPlayerActionCompleted();
+        
+        //데모용
+        if (supporter1 != null) supporter1.SetActive(false);
+        if (demoObject != null) demoObject.SetActive(true);
+
     }
 }
