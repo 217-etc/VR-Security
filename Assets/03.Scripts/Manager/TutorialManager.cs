@@ -1,16 +1,17 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class TutorialManager : MonoBehaviour
 {
-    public OVRHand ovrHand; // OVRHand 참조
-    public OVRSkeleton ovrSkeleton; // OVRSkeleton 참조
-    public GameObject debugSpherePrefab;
+    //public OVRHand ovrHand; // OVRHand 참조
+    //public OVRSkeleton ovrSkeleton; // OVRSkeleton 참조
+    //public GameObject debugSpherePrefab;
 
-    private Dictionary<string, Transform> boneTransforms = new Dictionary<string, Transform>();
-    private Dictionary<string, GameObject> debugSpheres = new Dictionary<string, GameObject>();
+    //private Dictionary<string, Transform> boneTransforms = new Dictionary<string, Transform>();
+    //private Dictionary<string, GameObject> debugSpheres = new Dictionary<string, GameObject>();
 
     private bool detectStart = false; // 손 감지 시작
     private bool isFist = false; // 현재 주먹 상태
@@ -20,14 +21,16 @@ public class TutorialManager : MonoBehaviour
     private const float palmThreshold = 40f; // 손가락 펼쳐졌다고 판단하는 각도
     private int fistCnt = 0;
 
-    private Transform wristTransform; // 손목 Transform
+    //private Transform wristTransform; // 손목 Transform
 
     [SerializeField] List<Image> _tryUI = new List<Image>();
     [SerializeField] GameObject _circleUI;
 
-    void Start()
+    public string moveSceneName;
+
+    void Awake()
     {
-        StartCoroutine(InitializeBones());
+        InitializeBones();
     }
 
     void DetectStart()
@@ -36,68 +39,27 @@ public class TutorialManager : MonoBehaviour
         Debug.LogWarning("감지 시작");
     }
 
-    private IEnumerator InitializeBones()
+    private void InitializeBones()
     {
-        while (ovrSkeleton.Bones == null || ovrSkeleton.Bones.Count == 0)
-        {
-            yield return null;
-        }
-
-        // 손가락 이름 리스트 (Pinky 대신 Little 사용)
-        string[] fingerNames = { "Thumb", "Index", "Middle", "Ring", "Little" };
-
-        foreach (var bone in ovrSkeleton.Bones)
-        {
-            string boneName = bone.Transform.name; // Transform의 실제 이름 가져오기
-
-            foreach (var finger in fingerNames)
-            {
-                if (boneName == $"XRHand_{finger}Proximal") // Base 관절
-                {
-                    boneTransforms[$"{finger}_Base"] = bone.Transform;
-                }
-                else if (boneName == $"XRHand_{finger}Tip") // Tip 손끝
-                {
-                    boneTransforms[$"{finger}_Tip"] = bone.Transform;
-                }
-                else if (boneName == "XRHand_Wrist") // 손목
-                {
-                    wristTransform = bone.Transform;
-                }
-            }
-        }
-
-        // 디버그 Sphere 생성 및 매핑
-        foreach (var key in boneTransforms.Keys)
-        {
-            Transform boneTransform = boneTransforms[key];
-
-            if (boneTransform != null)
-            {
-                GameObject debugSphere = Instantiate(debugSpherePrefab, boneTransform.position, Quaternion.identity);
-                debugSphere.transform.localScale = Vector3.one * 0.02f; // Sphere 크기 조정
-                debugSpheres[key] = debugSphere;
-            }
-        }
-
         Debug.Log("손가락 관절 및 디버그 Sphere 초기화 완료!");
         // 나레이션 재생
-        Invoke("DetectStart", 3f);
+        DetectStart();
     }
 
     void Update()
     {
-        if (!detectStart || boneTransforms.Count == 0 || wristTransform == null) return;
-
+        
+        if (!detectStart || DialogueManager.Instance.boneTransforms.Count == 0 || DialogueManager.Instance.wristTransform == null) return;
+        /*
         // 디버그 Sphere 위치 업데이트 (손가락 관절을 따라감)
-        foreach (var key in boneTransforms.Keys)
+        foreach (var key in DialogueManager.Instance.boneTransforms.Keys)
         {
-            if (debugSpheres.ContainsKey(key))
+            if (DialogueManager.Instance.debugSpheres.ContainsKey(key))
             {
-                debugSpheres[key].transform.position = boneTransforms[key].position;
+                DialogueManager.Instance.debugSpheres[key].transform.position = DialogueManager.Instance.boneTransforms[key].position;
             }
         }
-
+        */
         // 손가락 구부러짐 감지 (각도 기반)
         bool isThumbCurled = IsFingerCurled("Thumb");
         bool isIndexCurled = IsFingerCurled("Index");
@@ -157,19 +119,19 @@ public class TutorialManager : MonoBehaviour
         string baseKey = $"{finger}_Base";
         string tipKey = $"{finger}_Tip";
 
-        if (!boneTransforms.ContainsKey(baseKey) || !boneTransforms.ContainsKey(tipKey) || wristTransform == null)
+        if (!DialogueManager.Instance.boneTransforms.ContainsKey(baseKey) || !DialogueManager.Instance.boneTransforms.ContainsKey(tipKey) || DialogueManager.Instance.wristTransform == null)
             return false;
 
-        Transform baseJoint = boneTransforms[baseKey];
-        Transform tipJoint = boneTransforms[tipKey];
+        Transform baseJoint = DialogueManager.Instance.boneTransforms[baseKey];
+        Transform tipJoint = DialogueManager.Instance.boneTransforms[tipKey];
 
         // 손가락 벡터
         Vector3 fingerVector = (tipJoint.position - baseJoint.position).normalized;
 
         // 손바닥 벡터 (손목 → 중지 Base 방향)
-        Transform middleBase = boneTransforms.ContainsKey("Middle_Base") ? boneTransforms["Middle_Base"] : null;
+        Transform middleBase = DialogueManager.Instance.boneTransforms.ContainsKey("Middle_Base") ? DialogueManager.Instance.boneTransforms["Middle_Base"] : null;
         if (middleBase == null) return false;
-        Vector3 palmVector = (middleBase.position - wristTransform.position).normalized;
+        Vector3 palmVector = (middleBase.position - DialogueManager.Instance.wristTransform.position).normalized;
 
         // 손가락과 손바닥 벡터 간의 각도
         float angle = Vector3.Angle(fingerVector, palmVector);
@@ -191,19 +153,19 @@ public class TutorialManager : MonoBehaviour
         string baseKey = $"{finger}_Base";
         string tipKey = $"{finger}_Tip";
 
-        if (!boneTransforms.ContainsKey(baseKey) || !boneTransforms.ContainsKey(tipKey) || wristTransform == null)
+        if (!DialogueManager.Instance.boneTransforms.ContainsKey(baseKey) || !DialogueManager.Instance.boneTransforms.ContainsKey(tipKey) || DialogueManager.Instance.wristTransform == null)
             return false;
 
-        Transform baseJoint = boneTransforms[baseKey];
-        Transform tipJoint = boneTransforms[tipKey];
+        Transform baseJoint = DialogueManager.Instance.boneTransforms[baseKey];
+        Transform tipJoint = DialogueManager.Instance.boneTransforms[tipKey];
 
         // 손가락 벡터
         Vector3 fingerVector = (tipJoint.position - baseJoint.position).normalized;
 
         // 손바닥 벡터 (손목 → 중지 Base 방향)
-        Transform middleBase = boneTransforms.ContainsKey("Middle_Base") ? boneTransforms["Middle_Base"] : null;
+        Transform middleBase = DialogueManager.Instance.boneTransforms.ContainsKey("Middle_Base") ? DialogueManager.Instance.boneTransforms["Middle_Base"] : null;
         if (middleBase == null) return false;
-        Vector3 palmVector = (middleBase.position - wristTransform.position).normalized;
+        Vector3 palmVector = (middleBase.position - DialogueManager.Instance.wristTransform.position).normalized;
 
         // 손가락과 손바닥 벡터 간의 각도
         float angle = Vector3.Angle(fingerVector, palmVector);
@@ -221,6 +183,10 @@ public class TutorialManager : MonoBehaviour
             // 노란 동그라미 띄우기
             StartCoroutine(ShowCircleUI());
             // 세번째 완료되면 다음 씬으로 이동
+            if(fistCnt == 3)
+            {
+                Invoke("MoveToScene", 1.5f);
+            }
         }
     }
 
@@ -231,7 +197,7 @@ public class TutorialManager : MonoBehaviour
 
     private void ChangeJointColorGreen()
     {
-        foreach(GameObject sphere in debugSpheres.Values)
+        foreach(GameObject sphere in DialogueManager.Instance.debugSpheres.Values)
         {
             Renderer sphereRenderer = sphere.GetComponent<Renderer>();
             if (sphereRenderer != null)
@@ -243,7 +209,7 @@ public class TutorialManager : MonoBehaviour
 
     private void ChangeJointColorRed()
     {
-        foreach (GameObject sphere in debugSpheres.Values)
+        foreach (GameObject sphere in DialogueManager.Instance.debugSpheres.Values)
         {
             Renderer sphereRenderer = sphere.GetComponent<Renderer>();
             if (sphereRenderer != null)
@@ -258,6 +224,12 @@ public class TutorialManager : MonoBehaviour
         _circleUI.SetActive(true);
         yield return new WaitForSeconds(0.5f);
         _circleUI.SetActive(false);
+    }
+
+    private void MoveToScene()
+    {
+        Destroy(FindAnyObjectByType<MaintainCamera>().gameObject);
+        SceneManager.LoadScene(moveSceneName);
     }
 }
 
