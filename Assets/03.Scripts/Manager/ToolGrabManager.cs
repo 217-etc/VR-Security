@@ -13,6 +13,10 @@ public class ToolGrabManager : MonoBehaviour
     //데모용
     public GameObject supporter1;
     public GameObject demoObject;
+    public GameObject object1;
+    public GameObject object2;
+    public GameObject object3;
+    public GameObject object4;
 
     void Awake()
     {
@@ -84,10 +88,14 @@ public class ToolGrabManager : MonoBehaviour
     {
         yield return new WaitForSeconds(4f); // 4초 대기
         stepManager.OnPlayerActionCompleted();
-        
+
         //데모용
         if (supporter1 != null) supporter1.SetActive(false);
         if (demoObject != null) demoObject.SetActive(true);
+        if (object1 != null) supporter1.SetActive(false);
+        if (object2 != null) supporter1.SetActive(false);
+        if (object3 != null) supporter1.SetActive(false);
+        if (object4 != null) supporter1.SetActive(false);
 
     }
 }
