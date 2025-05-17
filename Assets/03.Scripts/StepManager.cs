@@ -11,6 +11,13 @@ public class StepManager : MonoBehaviour
     private bool isPlayerActionCompleted = false;   // 플레이어 행동 완료 여부
     private bool isStepInProgress = false;          // 중복 실행 방지용 플래그
 
+    // Feedback 부분
+    private Coroutine feedbackCoroutine;
+    private bool isGrabbing = false;
+    private float timeSinceRelease = 0f;
+    private bool isFeedbackPlaying = false;
+    private bool feedbackCooldown = false;
+
     [SerializeField] GameObject _noticeUI;
 
     void Start()
@@ -21,7 +28,12 @@ public class StepManager : MonoBehaviour
         NextStep(); // 첫 번째 단계 시작
     }
 
-    void NextStep()
+    void Update()
+    {
+        
+    }
+
+        void NextStep()
     {
         if (isStepInProgress) return;           // 중복 실행 방지
         isStepInProgress = true;
@@ -79,6 +91,10 @@ public class StepManager : MonoBehaviour
         // 3. UI & 음성 활성화
         DialogueManager.Instance.StartDialogue(step.dialogueKey);
 
+        // 0. Feedback 타이머 시작
+        if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
+        feedbackCoroutine = StartCoroutine(FeedbackLoop());
+
         // 4. 게이지 UI 활성화
         if (step.gaugeUI != null)
         {
@@ -107,7 +123,7 @@ public class StepManager : MonoBehaviour
             }
         }
 
-        DialogueManager.Instance.ShowNext?.Invoke();
+        DialogueManager.Instance.StartDialogue(step.dialogueKey + "_act");
 
         // 게이지 UI 비활성화는 WaitForDialogueThenProceed에서
     }
@@ -125,8 +141,10 @@ public class StepManager : MonoBehaviour
         // 대사 진행 중이면 대기
         while (DialogueManager.Instance != null && DialogueManager.Instance.isDialogueActive)
         {
+            //Debug.Log("대사가 아직 진행 중입니다.");
             yield return null;
         }
+        //Debug.Log("대사 종료");
 
         // 8. 게이지 UI 비활성화
         Step step = steps[currentStepIndex];
@@ -145,7 +163,7 @@ public class StepManager : MonoBehaviour
         if (isPlayerActionCompleted) return;
 
         SoundManager.Instance.PlaySFX("0.Suc_bell");
-        Debug.LogWarning(" OnPlayerActionCompleted() 호출됨!");
+        //Debug.LogWarning(" OnPlayerActionCompleted() 호출됨!");
         Debug.LogWarning(Environment.StackTrace);
 
         EndStep(steps[currentStepIndex]);
@@ -156,6 +174,12 @@ public class StepManager : MonoBehaviour
     // 7. GuideHand 비활성화
     public void WhenGrabbedObject()
     {
+        // 0. Feedback 타이머 멈추기
+        isGrabbing = true;
+        timeSinceRelease = 0f;
+        Debug.Log($"[FeedbackLoop] isGrabbing: {isGrabbing}");
+        if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
+
         SoundManager.Instance.PlaySFX("0.Grabbing");
         if (currentStepIndex >= 0 && currentStepIndex < steps.Count)
         {
@@ -172,4 +196,83 @@ public class StepManager : MonoBehaviour
             }
         }
     }
+
+    // 물체에서 손을 뗐을 때
+    public void WhenReleasedObject()
+    {
+        Debug.Log("손을 뗌");
+        isGrabbing = false;
+        timeSinceRelease = 0f;
+        Debug.Log($"[FeedbackLoop] isGrabbing: {isGrabbing}");
+
+        if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
+        feedbackCoroutine = StartCoroutine(FeedbackLoop());
+        Debug.Log("FeedbackCoroutine 재시작됨 (손을 뗐을 때)");
+    }
+
+    // Feedback 코루틴
+    private IEnumerator FeedbackLoop()
+    {
+        // 대사가 끝날 때까지 대기
+        while (DialogueManager.Instance != null && DialogueManager.Instance.isDialogueActive)
+        {
+            Debug.Log("대사가 아직 진행 중입니다.");
+            yield return null;
+        }
+        Debug.Log("대사 종료");
+
+        while (!isPlayerActionCompleted)
+        {
+            Debug.Log($"[FeedbackLoop 안쪽] isGrabbing: {isGrabbing}");
+            if (!feedbackCooldown)
+            {
+                if (isGrabbing)
+                {
+                    timeSinceRelease = 0f;
+                }
+                else
+                {
+                    timeSinceRelease += Time.deltaTime;
+                    //Debug.Log($"대사 대기 경과 시간: {timeSinceRelease:F2}");
+
+                    if (timeSinceRelease >= 5f)
+                    {
+                        Debug.Log("feedback 5초 넘어서 실행");
+                        StartCoroutine(PlayFeedback());
+                        timeSinceRelease = 0f;
+                    }
+                }
+            }
+
+            yield return null;
+        }
+    }
+
+    private IEnumerator PlayFeedback()
+    {
+        feedbackCooldown = true;
+        isFeedbackPlaying = true;
+
+        Step step = steps[currentStepIndex];
+        DialogueManager.Instance.StartDialogue(step.dialogueKey + "_fb");
+
+        foreach (GameObject obj in step.target)
+        {
+            foreach (Transform child in obj.GetComponentsInChildren<Transform>(true))
+            {
+                if (child.name.Contains("GuideHand"))
+                {
+                    child.gameObject.SetActive(true);
+                }
+            }
+        }
+
+        // 피드백 대사 끝날 때까지 기다림
+        yield return new WaitUntil(() => !DialogueManager.Instance.isDialogueActive);
+
+        feedbackCooldown = false;
+        isFeedbackPlaying = false;
+        timeSinceRelease = 0f; // 대사 끝나고 다시 0초부터
+    }
+
 }
