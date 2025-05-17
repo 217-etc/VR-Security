@@ -34,7 +34,7 @@ public class DialogueManager : Singleton<DialogueManager>
     private string _currentKey;
     private int _currentIndex = 0;
     public Action ShowNext;
-    private bool _waitingForAction = true;
+    private bool _waitingForAction = false;
 
     // 파싱 로딩
     public TextMeshProUGUI progressText;
