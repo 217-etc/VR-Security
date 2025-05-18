@@ -1,12 +1,12 @@
 using UnityEngine;
 
-public class CarMover : MonoBehaviour
+public class CarToLeft : MonoBehaviour
 {
     public float moveSpeed = 10f;      // 이동 속도
     public float turnSpeed = 90f;      // 회전 속도 (도/초)
 
-    private Vector3 targetPos1 = new Vector3(888f, 1.07f, -505f); // x축 888까지 가기
-    private Vector3 targetPos2 = new Vector3(888f, 1.07f, -800f); // 우회전
+    private Vector3 targetPos1 = new Vector3(-1000f, 0.6f, -382f); // x축 888까지 가기
+    private Vector3 targetPos2 = new Vector3(-1000f, 0.6f, -200f); // 우회전
 
     private enum MoveState { MoveX, TurnRight, MoveZ, Done }
     private MoveState moveState = MoveState.MoveX;
@@ -14,7 +14,7 @@ public class CarMover : MonoBehaviour
     void Start()
     {
         // transform.localPosition = new Vector3(110f, 1.07f, -505f);
-        transform.localEulerAngles = new Vector3(0f, 90f, 0f); // 초기 방향: 90도
+        //transform.localEulerAngles = new Vector3(0f, 90f, 0f); // 초기 방향: 90도
     }
 
     void Update()
@@ -31,9 +31,9 @@ public class CarMover : MonoBehaviour
 
             case MoveState.TurnRight:
                 float currentY = transform.localEulerAngles.y;
-                float newY = Mathf.MoveTowardsAngle(currentY, 179.9f, turnSpeed * Time.deltaTime);
+                float newY = Mathf.MoveTowardsAngle(currentY, 0.1f, turnSpeed * Time.deltaTime);
                 transform.localEulerAngles = new Vector3(0f, newY, 0f);
-                if (Mathf.Abs(Mathf.DeltaAngle(currentY, 179.9f)) < 0.5f)
+                if (Mathf.Abs(Mathf.DeltaAngle(currentY, 0.1f)) < 0.5f)
                 {
                     moveState = MoveState.MoveZ;
                 }
