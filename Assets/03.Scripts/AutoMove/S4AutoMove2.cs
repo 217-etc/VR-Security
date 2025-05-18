@@ -12,7 +12,8 @@ public class S4AutoMove2 : MonoBehaviour
     public S4AutoMove1 s4AutoMove1;
     public S3AutoMove s3AutoMove;
 
-    private bool S4Done = false;
+    public AudioClip sound1;
+    private AudioSource audioSource;
 
     void Update()
     {
@@ -21,14 +22,13 @@ public class S4AutoMove2 : MonoBehaviour
 
         if (S3Moved && S41Moved && transform.localEulerAngles.y >= 85.0f)
         {
-            if (S4Done) { return; } 
+            
             DeactivateHandMoveObjects();
             Debug.Log("S4 모든 행동 완료");
-            S4Done = true;
-            Debug.Log("현재 S42Moved 값: " + S4Done);
-            SoundManager.Instance.PlaySFX("Supporter");
-            stepManager.OnPlayerActionCompleted();            
+            stepManager.OnPlayerActionCompleted();
+            // LockWindow();
         }
+        
     }
 
     public void DeactivateHandMoveObjects()
@@ -36,5 +36,17 @@ public class S4AutoMove2 : MonoBehaviour
         HandMoveObject.SetActive(false);
         HandMoveObject_mirror.SetActive(false);
     }
+
+    /* void LockWindow()
+    {
+        if (isLocked) { return; }
+        isLocked = true;
+        if (audioSource != null && sound1 != null)
+        {
+            audioSource.clip = sound1;
+            audioSource.Play();
+        }
+        GaugeImage.SetActive(false); // 게이지 비활성화 삭제
+    }*/
 }
 

@@ -11,6 +11,9 @@ public class S2AutoMove2 : MonoBehaviour
     public GameObject GaugeImage;
     public StepManager stepManager;
 
+    public AudioClip sound1;
+    private AudioSource audioSource;
+
     public S2AutoMove1 s2AutoMove1; // S2AutoMove1을 참조
 
     private bool hasDone = false;
@@ -18,10 +21,9 @@ public class S2AutoMove2 : MonoBehaviour
     private float targetY2 = -5.0f;
     private float moveDuration = 1.0f;
 
-    private bool test1 = false;
-
     void Start()
     {
+        audioSource = gameObject.AddComponent<AudioSource>();
         if (stepManager == null)
         { Debug.LogError("StepManager가 할당되지 않았습니다! Unity 인스펙터에서 할당하세요."); }
     }
@@ -39,12 +41,6 @@ public class S2AutoMove2 : MonoBehaviour
         {
             StartCoroutine(MoveS2Smoothly2());
         }
-
-        if (!test1) { 
-            Debug.Log("현재 S2test1 값: " + test1); 
-            test1= true;
-        }
-
     }
 
     IEnumerator MoveS2Smoothly2()
@@ -92,7 +88,11 @@ public class S2AutoMove2 : MonoBehaviour
     void LockWindow()
     {
         isLocked = true;
-        SoundManager.Instance.PlaySFX("Supporter");
+        if (audioSource != null && sound1 != null)
+        {
+            audioSource.clip = sound1;
+            audioSource.Play();
+        }
         GaugeImage.SetActive(false); // 게이지 비활성화 삭제
     }
 }

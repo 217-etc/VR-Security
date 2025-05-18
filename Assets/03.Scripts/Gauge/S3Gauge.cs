@@ -29,7 +29,9 @@ public class S3Gauge : MonoBehaviour
 
     void FillGauge()
     {
+        // S3 객체 자신의 글로벌 x축 회전값 가져오기
         float rotationX = transform.localEulerAngles.x;
+        Debug.Log("S3의 X축 회전값: " + transform.localEulerAngles.x);
 
         // 90도 → 0%, 0도 → 100% 정규화
         float newGaugeValue = Mathf.InverseLerp(90f, 0f, rotationX);
