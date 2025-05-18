@@ -36,7 +36,7 @@ public class S2AutoMove1 : MonoBehaviour
             hasMoved = true;
         }
 
-        if (transform.localEulerAngles.x >= 269.0f && transform.localEulerAngles.x <= 271.0f)
+        if (transform.localEulerAngles.x >= 265.0f && transform.localEulerAngles.x <= 275.0f)
         {
             halfMoved = true;
         }
