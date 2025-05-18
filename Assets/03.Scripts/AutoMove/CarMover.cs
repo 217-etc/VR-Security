@@ -5,15 +5,15 @@ public class CarMover : MonoBehaviour
     public float moveSpeed = 10f;      // 이동 속도
     public float turnSpeed = 90f;      // 회전 속도 (도/초)
 
-    private Vector3 targetPos1 = new Vector3(888f, 1.07f, -505f); // x축 888까지 가기
-    private Vector3 targetPos2 = new Vector3(888f, 1.07f, -800f); // 우회전
+    private Vector3 targetPos1 = new Vector3(888f, 1.07f, -505f);
+    private Vector3 targetPos2 = new Vector3(888f, 1.07f, -800f);
 
     private enum MoveState { MoveX, TurnRight, MoveZ, Done }
     private MoveState moveState = MoveState.MoveX;
 
     void Start()
     {
-        // transform.localPosition = new Vector3(110f, 1.07f, -505f);
+        transform.localPosition = new Vector3(110f, 1.07f, -505f);
         transform.localEulerAngles = new Vector3(0f, 90f, 0f); // 초기 방향: 90도
     }
 
