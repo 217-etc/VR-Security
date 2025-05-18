@@ -123,7 +123,10 @@ public class StepManager : MonoBehaviour
             }
         }
 
-        DialogueManager.Instance.StartDialogue(step.dialogueKey + "_act");
+        if (DialogueManager.Instance.dialougeDictionary.ContainsKey(step.dialogueKey + "_act"))
+        {
+            DialogueManager.Instance.StartDialogue(step.dialogueKey + "_act");
+        }
 
         // 게이지 UI 비활성화는 WaitForDialogueThenProceed에서
     }
@@ -254,7 +257,10 @@ public class StepManager : MonoBehaviour
         isFeedbackPlaying = true;
 
         Step step = steps[currentStepIndex];
-        DialogueManager.Instance.StartDialogue(step.dialogueKey + "_fb");
+        if (DialogueManager.Instance.dialougeDictionary.ContainsKey(step.dialogueKey + "_fb"))
+        {
+            DialogueManager.Instance.StartDialogue(step.dialogueKey + "_fb");
+        }
 
         foreach (GameObject obj in step.target)
         {
