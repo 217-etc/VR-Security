@@ -10,6 +10,7 @@ public class S2AutoMove1 : MonoBehaviour
     public GameObject HandMoveObject_mirror;
     public GameObject GaugeImage;
     public StepManager stepManager;
+    public SupCheck supCheck;
 
     private bool hasMoved = false;
     private bool halfMoved = false;
@@ -27,7 +28,7 @@ public class S2AutoMove1 : MonoBehaviour
 
     void Update()
     {
-        if (transform.localEulerAngles.x <= 359.0f && transform.localPosition.y <= -3f && !hasMoved)
+        if (supCheck.SupChecked && transform.localEulerAngles.x <= 359.0f && transform.localPosition.y <= -3f && !hasMoved)
         {
             GaugeImage.SetActive(true);
             HandMoveObject.SetActive(false);

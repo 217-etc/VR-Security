@@ -65,6 +65,7 @@ public class S3AutoMove : MonoBehaviour
         }
         transform.localEulerAngles = new Vector3(targetXRotation, transform.localEulerAngles.y, transform.localEulerAngles.z);
         LockWindow();
+        stepManager?.OnPlayerActionCompleted();
     }
 
     public void ActivateHandMoveObjects()
