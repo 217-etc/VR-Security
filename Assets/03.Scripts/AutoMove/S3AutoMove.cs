@@ -4,17 +4,12 @@ using UnityEngine;
 using Oculus.Interaction;
 using Oculus.Interaction.Grab;
 
-// S3 잘 작동됨
-
 public class S3AutoMove : MonoBehaviour
 {
     public GameObject HandMoveObject;
     public GameObject HandMoveObject_mirror;
     public StepManager stepManager;
     public S4AutoMove1 s4AutoMove1;
-
-    public AudioClip sound1;
-    private AudioSource audioSource;
 
     private bool isLocked = false;
     private bool S3Moved = false;
@@ -39,7 +34,6 @@ public class S3AutoMove : MonoBehaviour
         if (isLocked) return;
 
         bool S41Moved = s4AutoMove1 != null && s4AutoMove1.GetS41Moved();
-        // Debug.Log("S3의 X축 회전값: " + transform.localEulerAngles.x);
 
         // S41Moved가 참이면 그랩 활성화
         if (S41Moved) { ActivateHandMoveObjects(); }
@@ -52,7 +46,6 @@ public class S3AutoMove : MonoBehaviour
             DeactivateHandMoveObjects();
             StartCoroutine(RotateS3(0.1f));
             S3Moved = true;
-            Debug.Log("S3Moved");
         }
     }
 
@@ -88,11 +81,7 @@ public class S3AutoMove : MonoBehaviour
 
     void LockWindow() { 
         isLocked = true;
-        if (audioSource != null && sound1 != null)
-        {
-            audioSource.clip = sound1;
-            audioSource.Play();
-        }
+        SoundManager.Instance.PlaySFX("Supporter");
     }
 
     public bool GetS3Moved() { return S3Moved; }
