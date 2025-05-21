@@ -4,14 +4,12 @@ using UnityEngine;
 using Oculus.Interaction;
 using Oculus.Interaction.Grab;
 
-// S3 잘 작동됨
-
 public class S3AutoMove : MonoBehaviour
 {
     public GameObject HandMoveObject;
     public GameObject HandMoveObject_mirror;
     public StepManager stepManager;
-    public S4AutoMove s4AutoMove;
+    public S4AutoMove1 s4AutoMove1;
 
     private bool isLocked = false;
     private bool S3Moved = false;
@@ -25,7 +23,7 @@ public class S3AutoMove : MonoBehaviour
             Debug.LogError("StepManager가 할당되지 않았습니다! Unity 인스펙터에서 할당하세요.");
         }
 
-        if (s4AutoMove == null)
+        if (s4AutoMove1 == null)
         {
             Debug.LogError("S4Controller가 할당되지 않았습니다! Unity 인스펙터에서 할당하세요.");
         }
@@ -35,11 +33,9 @@ public class S3AutoMove : MonoBehaviour
     {
         if (isLocked) return;
 
-        bool S41Moved = s4AutoMove != null && s4AutoMove.GetS41Moved();
-        // Debug.Log("S3의 X축 회전값: " + transform.localEulerAngles.x);
+        bool S41Moved = s4AutoMove1 != null && s4AutoMove1.GetS41Moved();
 
         // S41Moved가 참이면 그랩 활성화
-        // S3 살살 잡아야 함!
         if (S41Moved) { ActivateHandMoveObjects(); }
 
         // S41Moved가 참이고 x축 회전값이 0도이면 → 그랩 비활성화 + S3Moved = true
@@ -50,7 +46,6 @@ public class S3AutoMove : MonoBehaviour
             DeactivateHandMoveObjects();
             StartCoroutine(RotateS3(0.1f));
             S3Moved = true;
-            Debug.Log("S3Moved");
         }
     }
 
@@ -84,7 +79,10 @@ public class S3AutoMove : MonoBehaviour
         HandMoveObject_mirror.SetActive(false);
     }
 
-    void LockWindow() { isLocked = true; }
+    void LockWindow() { 
+        isLocked = true;
+        SoundManager.Instance.PlaySFX("Supporter");
+    }
 
     public bool GetS3Moved() { return S3Moved; }
 }
