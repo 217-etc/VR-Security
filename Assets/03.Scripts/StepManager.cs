@@ -106,6 +106,9 @@ public class StepManager : MonoBehaviour
         {
             step.gaugeUI.SetActive(true);
         }
+
+        // 대사 진행 대기
+        StartCoroutine(WaitForInitialDialogue(step));
     }
 
     void EndStep(Step step)
@@ -145,6 +148,18 @@ public class StepManager : MonoBehaviour
         StartCoroutine(WaitForDialogueThenProceed());
     }
 
+    // 단계 시작부분 대사 대기
+    private IEnumerator WaitForInitialDialogue(Step step)
+    {
+        while (DialogueManager.Instance != null && DialogueManager.Instance.isDialogueActive)
+        {
+            //Debug.Log("단계 시작 대사 진행 중...");
+            yield return null;
+        }
+        //Debug.Log("단계 시작 대사 종료");
+    }
+
+    // 단계 마무리부분 대사 대기
     private IEnumerator WaitForDialogueThenProceed()
     {
         // 대사 진행 중이면 대기
