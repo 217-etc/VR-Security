@@ -31,7 +31,7 @@ public class S2Gauge : MonoBehaviour
     {
         // S2의 글로벌 y축 회전값 받아오기
         float rotationY = transform.eulerAngles.y;
-        Debug.Log("현재 S2 회전값: " + rotationY);
+        // Debug.Log("현재 S2 회전값: " + rotationY);
 
         // 270~360도를 -90~0도로 변환
         /*if (rotationY >= 270f && rotationY <= 360f)
