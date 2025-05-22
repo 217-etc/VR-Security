@@ -244,9 +244,9 @@ public class StepManager : MonoBehaviour
                     timeSinceRelease += Time.deltaTime;
                     //Debug.Log($"대사 대기 경과 시간: {timeSinceRelease:F2}");
 
-                    if (timeSinceRelease >= 5f)
+                    if (timeSinceRelease >= 7f)
                     {
-                        Debug.Log("feedback 5초 넘어서 실행");
+                        Debug.Log("feedback 7초 넘어서 실행");
                         StartCoroutine(PlayFeedback());
                         timeSinceRelease = 0f;
                     }
