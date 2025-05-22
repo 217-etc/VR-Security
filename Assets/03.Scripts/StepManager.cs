@@ -30,10 +30,10 @@ public class StepManager : MonoBehaviour
 
     void Update()
     {
-        
+
     }
 
-        void NextStep()
+    void NextStep()
     {
         if (isStepInProgress) return;           // 중복 실행 방지
         isStepInProgress = true;
@@ -90,6 +90,12 @@ public class StepManager : MonoBehaviour
         }
         // 3. UI & 음성 활성화
         DialogueManager.Instance.StartDialogue(step.dialogueKey);
+
+        // 0. 자동완료 할지, 특정 키 값 입력
+        if (step.dialogueKey == "Dialogue_A003-2")
+        {
+            StartCoroutine(AutoCompleteAfterDelay(3f)); // 5초 뒤 자동 완료
+        }
 
         // 0. Feedback 타이머 시작
         if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
@@ -238,9 +244,9 @@ public class StepManager : MonoBehaviour
                     timeSinceRelease += Time.deltaTime;
                     //Debug.Log($"대사 대기 경과 시간: {timeSinceRelease:F2}");
 
-                    if (timeSinceRelease >= 5f)
+                    if (timeSinceRelease >= 7f)
                     {
-                        Debug.Log("feedback 5초 넘어서 실행");
+                        Debug.Log("feedback 7초 넘어서 실행");
                         StartCoroutine(PlayFeedback());
                         timeSinceRelease = 0f;
                     }
@@ -279,6 +285,22 @@ public class StepManager : MonoBehaviour
         feedbackCooldown = false;
         isFeedbackPlaying = false;
         timeSinceRelease = 0f; // 대사 끝나고 다시 0초부터
+    }
+
+    // 자동완료
+    private IEnumerator AutoCompleteAfterDelay(float delay)
+    {
+        // 대사가 끝날 때까지 기다림
+        while (DialogueManager.Instance != null && DialogueManager.Instance.isDialogueActive)
+            yield return null;
+
+        yield return new WaitForSeconds(delay);
+
+        if (!isPlayerActionCompleted)
+        {
+            //Debug.Log("자동 완료 타이머 종료 – 다음 단계로 진행");
+            CompleteCurrentStep();
+        }
     }
 
 }
