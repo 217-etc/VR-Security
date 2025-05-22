@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem.HID;
 
-public class GoriManager : MonoBehaviour
+public class ConnectObjectToObject : MonoBehaviour
 {
     bool _isComplete = false;
     [SerializeField] GameObject _connectedObejct;

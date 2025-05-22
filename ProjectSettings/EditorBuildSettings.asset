@@ -11,16 +11,16 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/map1.unity
     guid: b7d7b01f5cba7b74089d62bc7b7fcf23
-  - enabled: 1
+  - enabled: 0
     path: Assets/00.Test/UITest.unity
     guid: 4b1a5bf1c0cbbb04abddc8ed5b3993c4
-  - enabled: 1
+  - enabled: 0
     path: Assets/01.Scene/Start.unity
     guid: cea21879108e6604e8fec0f32deb8ff6
   - enabled: 0
     path: Assets/01.Scene/StageSelect.unity
     guid: 86ea56340ea741b4f9f7d425dcbd44bf
-  - enabled: 1
+  - enabled: 0
     path: Assets/01.Scene/Stage1Tutorial.unity
     guid: 99ce8a97a96932144a37c125748fc747
   - enabled: 1
