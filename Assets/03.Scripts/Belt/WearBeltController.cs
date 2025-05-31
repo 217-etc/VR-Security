@@ -13,7 +13,7 @@ public class WearBeltController : MonoBehaviour
         if(other.CompareTag("Head")){
             rope.GetComponent<GogoGaga.OptimizedRopesAndCables.Rope>().endPoint = bottomPoint;
             openBelt.SetActive(true);
-            Destroy(this);
+            Destroy(this.gameObject);
         } 
     }
 }
