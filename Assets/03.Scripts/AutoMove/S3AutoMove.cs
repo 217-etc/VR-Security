@@ -10,6 +10,8 @@ public class S3AutoMove : MonoBehaviour
     public GameObject HandMoveObject_mirror;
     public StepManager stepManager;
     public S4AutoMove1 s4AutoMove1;
+    public GameObject GaugeImage;
+    public Outline outline3;
 
     private bool isLocked = false;
     private bool S3Moved = false;
@@ -34,9 +36,13 @@ public class S3AutoMove : MonoBehaviour
         if (isLocked) return;
 
         bool S41Moved = s4AutoMove1 != null && s4AutoMove1.GetS41Moved();
+        Debug.Log("S3 x축 회전값: " + transform.localEulerAngles.x);
 
-        // S41Moved가 참이면 그랩 활성화
-        if (S41Moved) { ActivateHandMoveObjects(); }
+        // S41Moved가 참이면 게이지, 그랩 활성화
+        if (S41Moved) { 
+            ActivateHandMoveObjects();
+            GaugeImage.SetActive(true);
+        }
 
         // S41Moved가 참이고 x축 회전값이 0도이면 → 그랩 비활성화 + S3Moved = true
         // (인스펙터) 90 -> 180으로 이동 / 콘솔: 90 -> 0
@@ -65,6 +71,7 @@ public class S3AutoMove : MonoBehaviour
         }
         transform.localEulerAngles = new Vector3(targetXRotation, transform.localEulerAngles.y, transform.localEulerAngles.z);
         LockWindow();
+        GaugeImage.SetActive(false);
         stepManager?.OnPlayerActionCompleted();
     }
 

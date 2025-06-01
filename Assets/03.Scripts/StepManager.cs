@@ -70,8 +70,17 @@ public class StepManager : MonoBehaviour
         foreach (GameObject obj in step.target)
         {
             // 1. 아웃라인 켜기
-            Outline outline = obj?.GetComponentInChildren<Outline>();
-            if (outline != null) outline.enabled = true;
+            /* Outline outline = obj?.GetComponentInChildren<Outline>();
+            if (outline != null) outline.enabled = true; */ 
+
+            // nyj 추가, 지지대용 아웃라인 코드
+            Outline[] outlines = obj.GetComponentsInChildren<Outline>(true);
+            foreach (Outline outline in outlines)
+            {
+                outline.enabled = true;
+                break; // 첫 번째만 활성화하고 종료
+            }
+
 
             // 2. HandGrabInteractable / GuideHand 활성화
             Transform[] children = obj.GetComponentsInChildren<Transform>(true);
@@ -82,11 +91,24 @@ public class StepManager : MonoBehaviour
                     child.gameObject.SetActive(true);
                 }
 
-                if (child.name.Contains("GuideHand"))
+                /*if (child.name.Contains("GuideHand"))
                 {
                     child.gameObject.SetActive(true);
+                }*/ // nyj 추가 (수정): 아래 코드로 대체
+            }
+
+            // nyj 추가
+            Transform[] children2 = obj.GetComponentsInChildren<Transform>(true);
+            foreach (Transform child in children2)
+            {
+                if (child.name.Contains("GuideHand"))
+                {
+                    child.gameObject.SetActive(false);
+                    break; // ✅ 첫 번째만 처리하고 반복 종료
                 }
             }
+
+
         }
         // 3. UI & 음성 활성화
         DialogueManager.Instance.StartDialogue(step.dialogueKey);
@@ -118,8 +140,16 @@ public class StepManager : MonoBehaviour
         foreach (GameObject obj in step.target)
         {
             // 6. 아웃라인 끄기
-            Outline outline = obj?.GetComponentInChildren<Outline>();
-            if (outline != null) outline.enabled = false;
+            /*Outline outline = obj?.GetComponentInChildren<Outline>();
+            if (outline != null) outline.enabled = false;*/
+
+            // nyj 추가. 지지대용
+            Outline[] outlines = obj.GetComponentsInChildren<Outline>(true);
+            foreach (Outline outline in outlines)
+            {
+                outline.enabled = false;
+                break; // 첫 번째만 활성화하고 종료
+            }
 
             // 7. HandGrabInteractable 비활성화
             Transform[] children = obj.GetComponentsInChildren<Transform>(true);
@@ -215,6 +245,7 @@ public class StepManager : MonoBehaviour
                     if (child.name.Contains("GuideHand"))
                     {
                         child.gameObject.SetActive(false);
+                        break; // nyj 추가. 가장 처음 나온 가이드손만 활성화하고 바로 취소.
                     }
                 }
             }
@@ -290,6 +321,7 @@ public class StepManager : MonoBehaviour
                 if (child.name.Contains("GuideHand"))
                 {
                     child.gameObject.SetActive(true);
+                    break; // nyj 추가. 가장 처음 나온 가이드손만 활성화하고 바로 취소.
                 }
             }
         }

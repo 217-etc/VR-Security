@@ -12,6 +12,7 @@ public class S2AutoMove2 : MonoBehaviour
     public StepManager stepManager;
 
     public S2AutoMove1 s2AutoMove1; // S2AutoMove1을 참조
+    public Outline outline22;
 
     private bool hasDone = false;
     private bool isLocked = false;
@@ -27,6 +28,11 @@ public class S2AutoMove2 : MonoBehaviour
     void Update()
     {
         if (isLocked || s2AutoMove1 == null) return;
+
+        if (s2AutoMove1.HasMoved)
+        {
+            GaugeImage.SetActive(true);
+        }
 
         if (transform.localEulerAngles.x >= 340.0f && s2AutoMove1.HasMoved && s2AutoMove1.HalfMoved)
         {
@@ -58,6 +64,7 @@ public class S2AutoMove2 : MonoBehaviour
 
         transform.localPosition = S2targetPosition2;
         LockWindow();
+        outline22.enabled = false;
         stepManager?.OnPlayerActionCompleted();
     }
 
@@ -86,6 +93,6 @@ public class S2AutoMove2 : MonoBehaviour
     {
         isLocked = true;
         SoundManager.Instance.PlaySFX("Supporter");
-        // GaugeImage.SetActive(false); // 게이지 비활성화 삭제
+        GaugeImage.SetActive(false); // 게이지 비활성화
     }
 }

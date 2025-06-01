@@ -17,6 +17,7 @@ public class S4AutoMove1 : MonoBehaviour
     private bool S42Moved = false;
     private float prePosY = 0.0f;
     private bool actOnce = false;
+    public Outline outline41;
 
     void Start()
     {

@@ -7,10 +7,12 @@ public class S4AutoMove2 : MonoBehaviour
 {
     public GameObject HandMoveObject;
     public GameObject HandMoveObject_mirror;
+    public GameObject GaugeImage;
 
     public StepManager stepManager;
     public S4AutoMove1 s4AutoMove1;
     public S3AutoMove s3AutoMove;
+    public Outline outline42;
 
     private bool S4Done = false;
 
@@ -19,6 +21,11 @@ public class S4AutoMove2 : MonoBehaviour
         bool S3Moved = s3AutoMove != null && s3AutoMove.GetS3Moved();
         bool S41Moved = s4AutoMove1 != null && s4AutoMove1.GetS41Moved();
 
+        if (S3Moved && S41Moved && transform.localEulerAngles.y < 85.0f)
+        {
+            GaugeImage.SetActive(true);
+        }
+
         if (S3Moved && S41Moved && transform.localEulerAngles.y >= 85.0f)
         {
             if (S4Done) { return; } 
@@ -26,6 +33,7 @@ public class S4AutoMove2 : MonoBehaviour
             Debug.Log("S4 모든 행동 완료");
             S4Done = true;
             SoundManager.Instance.PlaySFX("Supporter");
+            GaugeImage.SetActive(false);
             stepManager?.OnPlayerActionCompleted();
         }
     }
