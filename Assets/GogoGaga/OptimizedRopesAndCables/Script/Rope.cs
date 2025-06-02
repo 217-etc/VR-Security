@@ -22,7 +22,7 @@ namespace GogoGaga.OptimizedRopesAndCables
         public Transform MidPoint => midPoint;
 
         [Tooltip("The rope will end at this point")]
-        [SerializeField] private Transform endPoint;
+        public Transform endPoint;
         public Transform EndPoint => endPoint;
 
         [Header("Rope Settings")]
