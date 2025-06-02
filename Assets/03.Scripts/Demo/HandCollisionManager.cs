@@ -10,13 +10,17 @@ public class HandCollisionManager : MonoBehaviour
     public GameObject eye;
     public float smoothTime = 0.3f; // 감속 시간
     private Vector3 targetPosition; // 목표 위치
+    private Vector3 reelTargetPosition; // 목표 위치
+    public  GameObject reelTarget;
     private Vector3 velocity = Vector3.zero; // 이동 속도(참조용)
     private bool isMoving = false; // 이동 상태 확인
+    public bool isReelMoving = false;
 
     public GameObject leftAnchor;
     public GameObject rightAnchor;
 
     public GameObject UI;
+    public GameObject fallDownGuideHand;
 
     void Update()
     {
@@ -47,10 +51,12 @@ public class HandCollisionManager : MonoBehaviour
                 smoothTime          // 감속 시간
             );
 
+
             // 목표 위치에 거의 도달하면 이동 종료
             if (Vector3.Distance(eye.transform.position, targetPosition) < 0.01f)
             {
                 isMoving = false;
+                isReelMoving = false;
                 leftHand.EndMove();
                 rightHand.EndMove();
                 velocity = Vector3.zero; // 속도 초기화
@@ -63,7 +69,10 @@ public class HandCollisionManager : MonoBehaviour
         Debug.Log("한 층 내려가기 시작");
         SoundManager.Instance.PlaySFX("Rope");
         targetPosition = eye.transform.position + new Vector3(0, -2.75f, 0); // 목표 위치 설정
+        reelTargetPosition = reelTarget.transform.position +  new Vector3(0, 2.75f, 0);
         isMoving = true; // 이동 활성화
+        isReelMoving = true;
+        fallDownGuideHand.SetActive(false);
     }
     void StartLanding()
     {
