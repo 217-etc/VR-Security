@@ -259,6 +259,8 @@ public class DialogueManager : Singleton<DialogueManager>
         {
             string text = dialogueStructure.dialogues[_currentIndex].text;
             string audioType = dialogueStructure.dialogues[_currentIndex].only_audio;
+
+            Debug.Log("대사는 전 UI창 활성화 여부 : " + noticeUI.activeSelf);
             if (audioType == "N")
             {
                 // UI 텍스트 교체
@@ -268,7 +270,10 @@ public class DialogueManager : Singleton<DialogueManager>
                 // UI가 이미 떠 있지 않은 경우 새로 띄워야 함.
                 if (!noticeUI.activeSelf)
                 {
-                    _animator.SetTrigger("NoticeAppear");
+                    //_animator.SetTrigger("NoticeAppear");
+                    noticeUI.SetActive(true);
+                    Canvas.ForceUpdateCanvases();
+                    Debug.Log("대사는 activeSelf false 라서 창 나타나게 함");
                 }
             }
             else
@@ -277,9 +282,14 @@ public class DialogueManager : Singleton<DialogueManager>
                 // 현재 UI가 떠있는지 체크
                 if (noticeUI.activeSelf)
                 {
-                    _animator.SetTrigger("NoticeDisappear");
+                    //_animator.SetTrigger("NoticeDisappear");
+                    noticeUI.SetActive(false);
+                    Canvas.ForceUpdateCanvases();
+                    Debug.Log("대사는 activeSelf True 라서 창 사라지게 함");
                 }
             }
+            Debug.Log("대사 후 UI창 활성화 여부 : " + noticeUI.activeSelf);
+
             yield return StartCoroutine(PlayTTS(ChangeStringForTTS(text)));
 
             Debug.LogWarning($"대사의 행동 타입 : {dialogueStructure.dialogues[_currentIndex].display_behaviour}");
