@@ -21,6 +21,8 @@ public class ScrewAutoMove_APT : MonoBehaviour
     public GameObject guideHand;
 
     public ScrewGauge screwGauge;  // 새로운 스크류 게이지 시스템 추가
+    public GameObject supporterHandGrab1;
+    public GameObject supporterHandGrab2;
 
     // 반대회전막기
     public OneGrabRotateTransformer_APT transformerScript; // 인스펙터에서 연결
@@ -116,6 +118,8 @@ public class ScrewAutoMove_APT : MonoBehaviour
             outline.enabled = false;
             guideHand.SetActive(false);
             gauge.SetActive(false);
+            supporterHandGrab1.SetActive(true);
+            supporterHandGrab2.SetActive(true);
         }
     }
 

@@ -26,6 +26,7 @@ public class GoriChangeController : MonoBehaviour
             hand2.SetActive(false);
             newGori.SetActive(true);
             //parent.transform.position = new Vector3(0.952000022f, -0.885999978f, -0.291999996f);
+            parent.transform.parent = newGori.transform;
             stepManager.SetActive(true);
         }
     }
