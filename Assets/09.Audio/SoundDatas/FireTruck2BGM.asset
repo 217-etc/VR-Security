@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   soundName: FireTruck2
   clip: {fileID: 8300000, guid: e0ad9ce9ca210704891578a85f3ff3b0, type: 3}
-  volume: 0.01
+  volume: 0.1
   loop: 1

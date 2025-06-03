@@ -4,14 +4,14 @@ using UnityEngine;
 using Oculus.Interaction;
 using Oculus.Interaction.Grab;
 
-public class S3AutoMove : MonoBehaviour
+public class S3AutoMoveEdited : MonoBehaviour
 {
     public GameObject HandMoveObject;
     public GameObject HandMoveObject_mirror;
-    public GameObject GuideHand;
     public StepManager stepManager;
-    public S4AutoMove1 s4AutoMove1;
+    public S4AutoMoveEdited s4AutoMoveEdited;
     public GameObject GaugeImage;
+    public GameObject GuideHand;
     public Outline outline3;
 
     private bool isLocked = false;
@@ -26,22 +26,16 @@ public class S3AutoMove : MonoBehaviour
         {
             Debug.LogError("StepManager가 할당되지 않았습니다! Unity 인스펙터에서 할당하세요.");
         }
-
-        if (s4AutoMove1 == null)
-        {
-            Debug.LogError("S4Controller가 할당되지 않았습니다! Unity 인스펙터에서 할당하세요.");
-        }
     }
 
     void Update()
     {
         if (isLocked) return;
 
-        bool S41Moved = s4AutoMove1 != null && s4AutoMove1.GetS41Moved();
-        //Debug.Log("S3 x축 회전값: " + transform.localEulerAngles.x);
+        bool S4Done = s4AutoMoveEdited != null && s4AutoMoveEdited.GetS4Done();
 
-        // S41Moved가 참이면 게이지, 그랩 활성화
-        if (S41Moved && !S3setting) { 
+        // S4Done이 참이면 게이지, 그랩 활성화
+        if (S4Done && !S3setting) { 
             ActivateHandMoveObjects();
             outline3.enabled = true;
             GaugeImage.SetActive(true);
@@ -52,13 +46,12 @@ public class S3AutoMove : MonoBehaviour
         // S41Moved가 참이고 x축 회전값이 0도이면 → 그랩 비활성화 + S3Moved = true
         // (인스펙터) 90 -> 180으로 이동 / 콘솔: 90 -> 0
         // S4의 x축 회전값이 20도보다 작아지면 자동 이동
-        if (S41Moved && transform.localEulerAngles.x <= 20.0f)
+        if (S4Done && transform.localEulerAngles.x <= 20.0f)
         {
             DeactivateHandMoveObjects();
             Destroy(GuideHand);
             outline3.enabled = false;
             StartCoroutine(RotateS3(0.1f));
-            S3Moved = true;
         }
     }
 
@@ -77,9 +70,9 @@ public class S3AutoMove : MonoBehaviour
             yield return null;
         }
         transform.localEulerAngles = new Vector3(targetXRotation, transform.localEulerAngles.y, transform.localEulerAngles.z);
-        LockWindow();
+        isLocked = true;
+        SoundManager.Instance.PlaySFX("Supporter");
         GaugeImage.SetActive(false);
-         // S3 움직이고 아웃라인, 게이지 끄기
         stepManager?.OnPlayerActionCompleted();
     }
 
@@ -94,11 +87,4 @@ public class S3AutoMove : MonoBehaviour
         HandMoveObject.SetActive(false);
         HandMoveObject_mirror.SetActive(false);
     }
-
-    void LockWindow() { 
-        isLocked = true;
-        SoundManager.Instance.PlaySFX("Supporter");
-    }
-
-    public bool GetS3Moved() { return S3Moved; }
 }

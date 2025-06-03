@@ -31,7 +31,7 @@ public class S2Gauge : MonoBehaviour
     {
         // S2의 글로벌 y축 회전값 받아오기
         float rotationY = transform.eulerAngles.y;
-        // Debug.Log("현재 S2 회전값: " + rotationY);
+        //Debug.Log("현재 S2 회전값: " + rotationY);
 
         // 270~360도를 -90~0도로 변환
         /*if (rotationY >= 270f && rotationY <= 360f)
@@ -40,8 +40,8 @@ public class S2Gauge : MonoBehaviour
         }*/
 
         // 270도 → 0, 90도 → 1로 정규화 Mathf.InverseLerp(270f, 90f, rotationY);
-        // 데모씬에선 360 -> 180도
-        float newGaugeValue = Mathf.InverseLerp(360f, 180f, rotationY);
+        // 데모씬에선 180 -> 0도
+        float newGaugeValue = Mathf.InverseLerp(180f, 0f, rotationY);
 
         // 게이지 값 업데이트 (감소 방지)
         newGaugeValue = Mathf.Clamp(newGaugeValue, previousGaugeValue, 1f);

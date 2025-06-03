@@ -9,6 +9,7 @@ public class S2AutoMove2 : MonoBehaviour
     public GameObject HandMoveObject;
     public GameObject HandMoveObject_mirror;
     public GameObject GaugeImage;
+    public GameObject GuideHand;
     public StepManager stepManager;
 
     public S2AutoMove1 s2AutoMove1; // S2AutoMove1을 참조
@@ -18,6 +19,8 @@ public class S2AutoMove2 : MonoBehaviour
     private bool isLocked = false;
     private float targetY2 = -5.0f;
     private float moveDuration = 1.0f;
+
+    public bool HasDone => hasDone;
 
     void Start()
     {
@@ -41,6 +44,8 @@ public class S2AutoMove2 : MonoBehaviour
 
         if (hasDone)
         {
+            outline22.enabled = false;
+            Destroy(GuideHand);
             StartCoroutine(MoveS2Smoothly2());
         }
     }
@@ -64,7 +69,7 @@ public class S2AutoMove2 : MonoBehaviour
 
         transform.localPosition = S2targetPosition2;
         LockWindow();
-        outline22.enabled = false;
+        GaugeImage.SetActive(false); // 게이지 비활성
         stepManager?.OnPlayerActionCompleted();
     }
 
@@ -93,6 +98,5 @@ public class S2AutoMove2 : MonoBehaviour
     {
         isLocked = true;
         SoundManager.Instance.PlaySFX("Supporter");
-        GaugeImage.SetActive(false); // 게이지 비활성화
     }
 }

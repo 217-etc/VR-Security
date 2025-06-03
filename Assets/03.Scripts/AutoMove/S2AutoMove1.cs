@@ -11,6 +11,8 @@ public class S2AutoMove1 : MonoBehaviour
     public StepManager stepManager;
     public SupCheck supCheck;
     public Outline outline21;
+    public GameObject GuideHand211;
+    public GameObject GuideHand;
 
     private bool hasMoved = false;
     private bool halfMoved = false;
@@ -25,6 +27,8 @@ public class S2AutoMove1 : MonoBehaviour
         if (stepManager == null)
         { Debug.LogError("StepManager가 할당되지 않았습니다! Unity 인스펙터에서 할당하세요."); }
         outline21.enabled = true;
+        HandMoveObject.SetActive(true);
+        HandMoveObject_mirror.SetActive(true);
     }
 
     void Update()
@@ -33,6 +37,7 @@ public class S2AutoMove1 : MonoBehaviour
 
         if (supCheck.SupChecked && transform.localEulerAngles.x <= 359.0f && transform.localPosition.y <= -3f && !hasMoved)
         {
+            Destroy(GuideHand211);
             HandMoveObject.SetActive(false);
             HandMoveObject_mirror.SetActive(false);
             StartCoroutine(MoveS2Smoothly1());
@@ -61,5 +66,6 @@ public class S2AutoMove1 : MonoBehaviour
         transform.localPosition = target;
         HandMoveObject.SetActive(true);
         HandMoveObject_mirror.SetActive(true);
+        GuideHand.SetActive(true);
     }
 }
