@@ -272,7 +272,7 @@ public class DialogueManager : Singleton<DialogueManager>
                 {
                     //_animator.SetTrigger("NoticeAppear");
                     noticeUI.SetActive(true);
-                    Canvas.ForceUpdateCanvases();
+                    
                     Debug.Log("대사는 activeSelf false 라서 창 나타나게 함");
                 }
             }
@@ -284,7 +284,7 @@ public class DialogueManager : Singleton<DialogueManager>
                 {
                     //_animator.SetTrigger("NoticeDisappear");
                     noticeUI.SetActive(false);
-                    Canvas.ForceUpdateCanvases();
+                    
                     Debug.Log("대사는 activeSelf True 라서 창 사라지게 함");
                 }
             }
