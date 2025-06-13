@@ -23,6 +23,8 @@ public class S2AutoMoveEdited : MonoBehaviour
     public GameObject GaugeImage;
     public GameObject GuideHand211; // 섭첵 가이드손
     public GameObject GuideHand; // S2 가이드손
+    public GameObject S2CKUI; // 섭첵 확인 UI
+    public GameObject S2UI; // S2 UI
 
     void Start()
     {
@@ -40,6 +42,7 @@ public class S2AutoMoveEdited : MonoBehaviour
         // 맨앞에 supCheck.SupChecked &&  추가하면 됨
         if (transform.localEulerAngles.x <=359.0f && transform.localPosition.y <= -3f && !hasMoved)
         {
+            S2UI.SetActive(true);
             stepManager.enabled = false; // 스텝매니저 끄기
             HandMoveObject.SetActive(false);
             HandMoveObject_mirror.SetActive(false);
