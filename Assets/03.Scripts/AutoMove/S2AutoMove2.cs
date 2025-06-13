@@ -86,6 +86,6 @@ public class S2AutoMove2 : MonoBehaviour
     {
         isLocked = true;
         SoundManager.Instance.PlaySFX("Supporter");
-        GaugeImage.SetActive(false); // 게이지 비활성화 삭제
+        // GaugeImage.SetActive(false); // 게이지 비활성화 삭제
     }
 }

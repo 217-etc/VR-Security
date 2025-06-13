@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem.HID;
+using UnityEngine.UIElements;
 
 public class GoriManager : MonoBehaviour
 {
+    public StepManager stepManager;
     bool _isComplete = false;
     [SerializeField] GameObject _connectedObejct;
 
@@ -41,6 +43,7 @@ public class GoriManager : MonoBehaviour
             if (_currentWaypointIndex + 2 >= _waypoints.Length)
             {
                 Debug.Log("모든 웨이포인트를 완료했습니다.");
+                stepManager.OnPlayerActionCompleted();
                 yield break;
             }
         }
@@ -63,9 +66,10 @@ public class GoriManager : MonoBehaviour
             _isComplete = true;
 
             _connectedObejct.transform.parent = gameObject.transform;
-        
+            stepManager.OnPlayerActionCompleted();
+            transform.position = _waypoints[3].position;
             Debug.LogWarning("속도조절기에 닿았음");
-            StartCoroutine(MoveAlongBezierCurve());
+            //StartCoroutine(MoveAlongBezierCurve());
         }
     }
 }
