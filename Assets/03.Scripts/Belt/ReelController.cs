@@ -8,4 +8,12 @@ public class ReelController : MonoBehaviour
     {
         GetComponent<Rigidbody>().isKinematic = false;
     }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.transform.CompareTag("Finish"))
+        {
+            FindAnyObjectByType<StepManager>().OnPlayerActionCompleted();
+        }
+    }
 }

@@ -74,9 +74,11 @@ public class StepManager : MonoBehaviour
             if (outline != null) outline.enabled = true;
 
             // 2. HandGrabInteractable / GuideHand 활성화
-            Transform[] children = obj.GetComponentsInChildren<Transform>(true);
-            foreach (Transform child in children)
+            Transform parentTransform = obj.transform;
+            for (int i = 0; i < parentTransform.childCount; i++)
             {
+                Transform child = parentTransform.GetChild(i);
+
                 if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
                 {
                     child.gameObject.SetActive(true);
@@ -86,6 +88,11 @@ public class StepManager : MonoBehaviour
                 {
                     child.gameObject.SetActive(true);
                 }
+
+                /*if (child.name.Contains("Outline"))
+                {
+                    child.GetComponent<Outline>().enabled = true;
+                }*/
             }
         }
         // 3. UI & 음성 활성화

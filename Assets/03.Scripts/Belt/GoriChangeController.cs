@@ -10,6 +10,7 @@ public class GoriChangeController : MonoBehaviour
     public GameObject prevGori4;
     public GameObject newGori;
     public GameObject stepManager;
+    public StepManager stepManager_before;
     public GameObject hand1;
     public GameObject hand2;
     public GameObject parent;
@@ -27,7 +28,7 @@ public class GoriChangeController : MonoBehaviour
             newGori.SetActive(true);
             //parent.transform.position = new Vector3(0.952000022f, -0.885999978f, -0.291999996f);
             parent.transform.parent = newGori.transform;
-            stepManager.SetActive(true);
+            stepManager_before.OnPlayerActionCompleted();
         }
     }
 }

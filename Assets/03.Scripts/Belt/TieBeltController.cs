@@ -20,6 +20,7 @@ public class TieBeltController : MonoBehaviour
     private float distance;
     private float lastProgress;
     float progress = 0f;
+    public StepManager stepManager;
 
     private void Awake()
     {
@@ -36,7 +37,7 @@ public class TieBeltController : MonoBehaviour
     {
         if (IsComplete) return;
 
-        Debug.Log(progress);
+        //Debug.Log(progress);
         if (IsGrabBelt)
         {
             //Debug.Log("[Belt] : Connect Belt를 잡고 있음");
@@ -119,6 +120,7 @@ public class TieBeltController : MonoBehaviour
         if (progress >= 1f)
         {
             Debug.Log("[Belt] : 벨트 조이기를 완수함.");
+            stepManager.OnPlayerActionCompleted();
             IsComplete = true;
             SetActiveFalse();
         }
