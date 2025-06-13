@@ -10,6 +10,7 @@ public class S2AutoMoveEdited : MonoBehaviour
     private bool halfMoved = false;
     private bool hasDone = false; // S2가 두 번째 이동했는지 체크
     private bool isLocked = false;
+    private bool S2Setting = false;
     private float targetY1 = -2.0f;
     private float targetY2 = -5.0f;
     private float moveDuration = 1.0f;
@@ -37,12 +38,19 @@ public class S2AutoMoveEdited : MonoBehaviour
     {
         if (isLocked) return;
 
+        if(supCheck.SupChecked && !S2Setting)
+        {
+
+            S2Setting = true;
+        }
+
         // 섭첵 완료되면 앞으로 이동. 이동 후 게이지, 가이드손 켜기
         // 나중에 섭첵 추가. 섭첵에서 섭첵, S2 가이드손 끄고 켬
         // 맨앞에 supCheck.SupChecked &&  추가하면 됨
-        if (transform.localEulerAngles.x <=359.0f && transform.localPosition.y <= -3f && !hasMoved)
+        if (supCheck.SupChecked && transform.localEulerAngles.x <=359.0f && transform.localPosition.y <= -3f && !hasMoved)
         {
-            S2UI.SetActive(true);
+            S2CKUI.SetActive(false); // 수정: 체크 UI 끄기
+            S2UI.SetActive(true); // 얘도 섭첵에서 켜는 걸로
             stepManager.enabled = false; // 스텝매니저 끄기
             HandMoveObject.SetActive(false);
             HandMoveObject_mirror.SetActive(false);
@@ -113,6 +121,7 @@ public class S2AutoMoveEdited : MonoBehaviour
         GaugeImage.SetActive(false); // 게이지 끄기
         GuideHand.SetActive(false); // 가이드손 끄기
         outline2.enabled = false; // 아웃라인 끄기
+        S2UI.SetActive(false); // UI 끄기
     }
 
     IEnumerator MoveS2RotateToTarget(float targetXRotation)

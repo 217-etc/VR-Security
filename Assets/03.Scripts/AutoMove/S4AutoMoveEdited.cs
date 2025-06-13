@@ -14,6 +14,7 @@ public class S4AutoMoveEdited : MonoBehaviour
     public GameObject GaugeImage;
     public GameObject GuideHand;
     public GameObject GuideHand40;
+    public GameObject S4UI; // 수정: S4 UI 추가
     public Outline outline4;
 
     private float moveDuration = 1.0f;
@@ -23,7 +24,7 @@ public class S4AutoMoveEdited : MonoBehaviour
 
     void Start()
     {
-        ActivateHandMoveObjects(); // 처음엔 그랩 활성화
+        //ActivateHandMoveObjects(); // 처음엔 그랩 활성화
         if (stepManager == null)
         {
             Debug.LogError("StepManager가 할당되지 않았습니다! Unity 인스펙터에서 할당하세요.");
@@ -88,6 +89,7 @@ public class S4AutoMoveEdited : MonoBehaviour
         ActivateHandMoveObjects();
         outline4.enabled = true;
         GuideHand40.SetActive(true);
+        S4UI.SetActive(true); // 수정: UI 켜기
     }
 
     public void ActivateHandMoveObjects()
