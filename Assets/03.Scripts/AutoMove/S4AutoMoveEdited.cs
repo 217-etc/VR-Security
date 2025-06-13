@@ -9,7 +9,8 @@ public class S4AutoMoveEdited : MonoBehaviour
     public GameObject HandMoveObject;
     public GameObject HandMoveObject_mirror;
     public StepManager stepManager;
-    public S2AutoMove2 s2AutoMove2;
+    // public S2AutoMove2 s2AutoMove2;
+    public S2AutoMoveEdited s2AutoMoveEdited; // 수정
     public GameObject GaugeImage;
     public GameObject GuideHand;
     public GameObject GuideHand40;
@@ -34,7 +35,7 @@ public class S4AutoMoveEdited : MonoBehaviour
         Debug.Log("S41Moved = " + S41Moved);
         Debug.Log("S4 y축 회전값: " + transform.localEulerAngles.y);
 
-        if (s2AutoMove2.HasDone && !S4setting)
+        if (s2AutoMoveEdited.HasDone && !S4setting) // 수정: 원래 s2AutoMove2 였음
         {
             StartCoroutine(DelayFunction4e());
             S4setting = true;
@@ -58,7 +59,8 @@ public class S4AutoMoveEdited : MonoBehaviour
             GaugeImage.SetActive(false);
             GuideHand.SetActive(false);
             S4Done = true;
-            stepManager.OnPlayerActionCompleted();
+            // stepManager.OnPlayerActionCompleted(); // 수정
+            stepManager.enabled = true; // 수정: 스텝매니저 다시 켜기
         }
     }
 

@@ -10,7 +10,7 @@ public class S2AutoMove1 : MonoBehaviour
     public GameObject HandMoveObject_mirror;
     public StepManager stepManager;
     public SupCheck supCheck;
-    public Outline outline21;
+    public Outline outline21; 
     public GameObject GuideHand211;
     public GameObject GuideHand;
 
