@@ -132,10 +132,17 @@ public class StepManager : MonoBehaviour
             if (outline != null) outline.enabled = false;
 
             // 7. HandGrabInteractable 비활성화
-            Transform[] children = obj.GetComponentsInChildren<Transform>(true);
-            foreach (Transform child in children)
+            Transform parentTransform = obj.transform;
+            for (int i = 0; i < parentTransform.childCount; i++)
             {
+                Transform child = parentTransform.GetChild(i);
+
                 if (child.name.Contains("HandGrabInteractable") || child.name.Contains("HandGrabInteractable_Mirror"))
+                {
+                    child.gameObject.SetActive(false);
+                }
+
+                if (child.name.Contains("GuideHand"))
                 {
                     child.gameObject.SetActive(false);
                 }
@@ -219,9 +226,11 @@ public class StepManager : MonoBehaviour
         {
             foreach (GameObject obj in steps[currentStepIndex].target)
             {
-                Transform[] children = obj.GetComponentsInChildren<Transform>(true);
-                foreach (Transform child in children)
+                Transform parentTransform = obj.transform;
+                for (int i = 0; i < parentTransform.childCount; i++)
                 {
+                    Transform child = parentTransform.GetChild(i);
+
                     if (child.name.Contains("GuideHand"))
                     {
                         child.gameObject.SetActive(false);
@@ -295,12 +304,16 @@ public class StepManager : MonoBehaviour
 
         foreach (GameObject obj in step.target)
         {
-            foreach (Transform child in obj.GetComponentsInChildren<Transform>(true))
+            Transform parentTransform = obj.transform;
+            for (int i = 0; i < parentTransform.childCount; i++)
             {
+                Transform child = parentTransform.GetChild(i);
+
                 if (child.name.Contains("GuideHand"))
                 {
                     child.gameObject.SetActive(true);
                 }
+               
             }
         }
 

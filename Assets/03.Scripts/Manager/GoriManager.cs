@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem.HID;
+using UnityEngine.UIElements;
 
 public class GoriManager : MonoBehaviour
 {
@@ -65,9 +66,10 @@ public class GoriManager : MonoBehaviour
             _isComplete = true;
 
             _connectedObejct.transform.parent = gameObject.transform;
-        
+            stepManager.OnPlayerActionCompleted();
+            transform.position = _waypoints[3].position;
             Debug.LogWarning("속도조절기에 닿았음");
-            StartCoroutine(MoveAlongBezierCurve());
+            //StartCoroutine(MoveAlongBezierCurve());
         }
     }
 }
