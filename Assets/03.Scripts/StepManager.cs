@@ -89,17 +89,20 @@ public class StepManager : MonoBehaviour
             }
         }
         // 3. UI & 음성 활성화
-        DialogueManager.Instance.StartDialogue(step.dialogueKey);
-
-        // 0. 자동완료 할지, 특정 키 값 입력
-        if (step.dialogueKey == "Dialogue_A003-2")
+        if (!String.IsNullOrWhiteSpace(step.dialogueKey))
         {
-            StartCoroutine(AutoCompleteAfterDelay(3f)); // 5초 뒤 자동 완료
-        }
+            DialogueManager.Instance.StartDialogue(step.dialogueKey);
 
-        // 0. Feedback 타이머 시작
-        if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
-        feedbackCoroutine = StartCoroutine(FeedbackLoop());
+            // 0. 자동완료 할지, 특정 키 값 입력
+            if (step.dialogueKey == "Dialogue_A003-2")
+            {
+                StartCoroutine(AutoCompleteAfterDelay(3f)); // 5초 뒤 자동 완료
+            }
+
+            // 0. Feedback 타이머 시작
+            if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
+            feedbackCoroutine = StartCoroutine(FeedbackLoop());
+        }
 
         // 4. 게이지 UI 활성화
         if (step.gaugeUI != null)
@@ -258,7 +261,7 @@ public class StepManager : MonoBehaviour
                 {
                     timeSinceRelease += Time.deltaTime;
                     //Debug.Log($"대사 대기 경과 시간: {timeSinceRelease:F2}");
-
+                    
                     if (timeSinceRelease >= 7f)
                     {
                         Debug.Log("feedback 7초 넘어서 실행");

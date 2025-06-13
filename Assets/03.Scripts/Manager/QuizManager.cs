@@ -38,11 +38,13 @@ public class QuizManager : MonoBehaviour
     void Start()
     {
         totalQuizCnt = _quiz.Count;
+        ShowQuiz();
     }
 
     public void ShowQuiz()
     {
         QuizContent quizContent = _quiz[curQuizIndex];
+        _CorrectQuiz.SetActive(false);
 
         if (quizContent != null)
         {
@@ -69,7 +71,7 @@ public class QuizManager : MonoBehaviour
         _CorrectQuiz.GetComponent<Image>().sprite = quizContent.correctFeedback[0];
 
         // Set Wrong Feedback Image
-        _WrongQuiz.GetComponent<Image>().sprite = quizContent.wrongFeedback[0];
+        //_WrongQuiz.GetComponent<Image>().sprite = quizContent.wrongFeedback[0];
     }
 
     public void Set4AnserQuiz(QuizContent quizContent)

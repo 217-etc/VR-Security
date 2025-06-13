@@ -10,6 +10,7 @@ public class TieBeltController : MonoBehaviour
     [SerializeField] private OneGrabTranslateTransformer goriTransformer;
     [SerializeField] private GameObject gori; 
     [SerializeField] private GameObject belt; 
+    [SerializeField] private GameObject gauge; 
 
     public Transform goriTransform;
     public Vector3 startPos;
@@ -138,5 +139,6 @@ public class TieBeltController : MonoBehaviour
     {
         gori.SetActive(false);
         belt.SetActive(false);
+        gauge.SetActive(false);
     }
 }
