@@ -17,17 +17,19 @@
 
 특히 Hand Tracking 기술을 도입하여 학습자가 실제 손으로 안전 장비를 조작하는 듯한 경험을 할 수 있습니다.
 
-[](https://lh7-rt.googleusercontent.com/docsz/AD_4nXdKd34aQtjwZILprwJJLqCWjXUofLrav8q4P5T7ck6eCo40NAR-LkCmSXP6xrFxpO-ZUAD9tjuM-x1aTOzPz2b3AePeib52fL8ssXiTqUjtLk3r9yjkjDDgI9AmOLNaEgQ4DrmZ?key=aKAnRgUEpyAmlpDNKMgYyQ)
+![Image](https://github.com/user-attachments/assets/aa8b12ab-660b-4fc3-972e-0632860ebc15)
 
 <완강기 VR 안전교육>은 크게 **‘튜토리얼 > 완강기 학습 > 퀴즈’** 세 단계에 걸쳐 진행됩니다.
 
 먼저 콘텐츠의 기본 조작법을 익히는 튜토리얼을 진행한 뒤, 완강기 학습 단계를 수행합니다.
 
 모든 학습이 종료되면, 배운 내용을 다시 확인하는 퀴즈로 마무리됩니다.
+<br><br>
+
 
 **주요 기능 :**
 
-![Frame 3 (1).png](attachment:b07b48eb-468c-469d-88c0-323b71700e19:Frame_3_(1).png)
+![Image](https://github.com/user-attachments/assets/2d4ae950-e648-4577-998d-58d0460a9830)
 
 1. **학습단계 관리**
     
