@@ -1,18 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class TouchWindow : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    Vector3 initPos;
+
+    private void Start()
     {
-        
+        initPos = transform.position;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        transform.position = initPos;
+    }
+    public void WhenTouchWindow()
+    {
+        SceneManager.LoadScene("MDemoStage_FallDown");
     }
 }

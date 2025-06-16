@@ -113,7 +113,7 @@ public class HandCollisionManager : MonoBehaviour
 
     void WhenLanding()
     {
-        fallDownGuideHand.SetActive(false);
+        Destroy(fallDownGuideHand);
         stepManager.OnPlayerActionCompleted();
     }
 }
