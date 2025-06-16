@@ -8,6 +8,7 @@ public class SceneMove : MonoBehaviour
 
     public void MoveToScene()
     {
+        if (!DialogueManager.Instance.isInitializeComplete) return;
         SceneManager.LoadScene(_sceneName);
     }
 

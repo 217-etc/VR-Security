@@ -25,9 +25,8 @@ public class S4AutoMove2 : MonoBehaviour
             DeactivateHandMoveObjects();
             Debug.Log("S4 모든 행동 완료");
             S4Done = true;
-            // Debug.Log("현재 S42Moved 값: " + S4Done);
             SoundManager.Instance.PlaySFX("Supporter");
-            stepManager.OnPlayerActionCompleted();            
+            stepManager?.OnPlayerActionCompleted();
         }
     }
 

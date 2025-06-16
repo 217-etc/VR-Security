@@ -18,8 +18,6 @@ public class S2AutoMove2 : MonoBehaviour
     private float targetY2 = -5.0f;
     private float moveDuration = 1.0f;
 
-    private bool test1 = false;
-
     void Start()
     {
         if (stepManager == null)
@@ -39,12 +37,6 @@ public class S2AutoMove2 : MonoBehaviour
         {
             StartCoroutine(MoveS2Smoothly2());
         }
-
-        if (!test1) { 
-            Debug.Log("현재 S2test1 값: " + test1); 
-            test1= true;
-        }
-
     }
 
     IEnumerator MoveS2Smoothly2()
@@ -66,6 +58,7 @@ public class S2AutoMove2 : MonoBehaviour
 
         transform.localPosition = S2targetPosition2;
         LockWindow();
+        stepManager?.OnPlayerActionCompleted();
     }
 
     IEnumerator MoveS2RotateToTarget(float targetXRotation)
@@ -93,6 +86,6 @@ public class S2AutoMove2 : MonoBehaviour
     {
         isLocked = true;
         SoundManager.Instance.PlaySFX("Supporter");
-        GaugeImage.SetActive(false); // 게이지 비활성화 삭제
+        // GaugeImage.SetActive(false); // 게이지 비활성화 삭제
     }
 }

@@ -8,61 +8,112 @@ public class HandCollisionManager : MonoBehaviour
     public HandCollisionHandler leftHand;
     public HandCollisionHandler rightHand;
     public GameObject eye;
-    public float smoothTime = 0.3f; // °¨¼Ó ½Ã°£
-    private Vector3 targetPosition; // ¸ñÇ¥ À§Ä¡
-    private Vector3 velocity = Vector3.zero; // ÀÌµ¿ ¼Óµµ(ÂüÁ¶¿ë)
-    private bool isMoving = false; // ÀÌµ¿ »óÅÂ È®ÀÎ
+    public float smoothTime = 0.3f; // ê°ì† ì‹œê°„
+    private Vector3 targetPosition; // ëª©í‘œ ìœ„ì¹˜
+    private Vector3 reelTargetPosition; // ëª©í‘œ ìœ„ì¹˜
+    public  GameObject reelTarget;
+    private Vector3 velocity = Vector3.zero; // ì´ë™ ì†ë„(ì°¸ì¡°ìš©)
+    private bool isMoving = false; // ì´ë™ ìƒíƒœ í™•ì¸
+    public bool isReelMoving = false;
+
+    public GameObject leftAnchor;
+    public GameObject rightAnchor;
+
+    public GameObject UI;
+    public GameObject fallDownGuideHand;
+
+    public StepManager stepManager;
+    public bool isLanding = false;
+
+    void Start()
+    {
+        //stepManager = FindObjectOfType<StepManager>();
+        if (stepManager == null)
+        {
+            Debug.LogError("StepManagerê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤! Unity ì¸ìŠ¤í™í„°ì—ì„œ í• ë‹¹í•˜ì„¸ìš”.");
+        }
+    }
 
     void Update()
     {
  
-        if (leftHand.IsTouchingWall && rightHand.IsTouchingWall && eye.transform.position.y > 15f)
+        if ((leftHand.IsTouchingWall || rightHand.IsTouchingWall) && eye.transform.position.y > 1.2f)
         {
             leftHand.StartMove();
             rightHand.StartMove();
             StartMoving();
         }
-        if (leftHand.IsTouchingWall && rightHand.IsTouchingWall && eye.transform.position.y < 15f && eye.transform.position.y > 5f)
+
+        if(eye.transform.position.y < 1.3f && !isLanding)
         {
-            leftHand.StartMove();
-            rightHand.StartMove();
-            StartLanding();
+            isLanding = true;
+            WhenLanding();
         }
 
-        // ÀÌµ¿ Ã³¸®
+        if(IsHandUp(leftAnchor.transform) && IsHandUp(rightAnchor.transform))
+        {
+            UI.SetActive(true);
+        }
+        else
+        {
+            UI.SetActive(false);
+        }
+
+        // ì´ë™ ì²˜ë¦¬
         if (isMoving)
         {
             eye.transform.position = Vector3.SmoothDamp(
-                eye.transform.position, // ÇöÀç À§Ä¡
-                targetPosition,     // ¸ñÇ¥ À§Ä¡
-                ref velocity,       // ¼Óµµ (ÂüÁ¶·Î Àü´Ş)
-                smoothTime          // °¨¼Ó ½Ã°£
+                eye.transform.position, // í˜„ì¬ ìœ„ì¹˜
+                targetPosition,     // ëª©í‘œ ìœ„ì¹˜
+                ref velocity,       // ì†ë„ (ì°¸ì¡°ë¡œ ì „ë‹¬)
+                smoothTime          // ê°ì† ì‹œê°„
             );
 
-            // ¸ñÇ¥ À§Ä¡¿¡ °ÅÀÇ µµ´ŞÇÏ¸é ÀÌµ¿ Á¾·á
+
+            // ëª©í‘œ ìœ„ì¹˜ì— ê±°ì˜ ë„ë‹¬í•˜ë©´ ì´ë™ ì¢…ë£Œ
             if (Vector3.Distance(eye.transform.position, targetPosition) < 0.01f)
             {
                 isMoving = false;
+                isReelMoving = false;
                 leftHand.EndMove();
                 rightHand.EndMove();
-                velocity = Vector3.zero; // ¼Óµµ ÃÊ±âÈ­
+                velocity = Vector3.zero; // ì†ë„ ì´ˆê¸°í™”
+                stepManager.WhenReleasedObject();
             }
         }
     }
 
     void StartMoving()
     {
-        Debug.Log("ÇÑ Ãş ³»·Á°¡±â ½ÃÀÛ");
+        Debug.Log("í•œ ì¸µ ë‚´ë ¤ê°€ê¸° ì‹œì‘");
         SoundManager.Instance.PlaySFX("Rope");
-        targetPosition = eye.transform.position + new Vector3(0, -20, 0); // ¸ñÇ¥ À§Ä¡ ¼³Á¤
-        isMoving = true; // ÀÌµ¿ È°¼ºÈ­
+        targetPosition = eye.transform.position + new Vector3(0, -2.75f, 0); // ëª©í‘œ ìœ„ì¹˜ ì„¤ì •
+        reelTargetPosition = reelTarget.transform.position +  new Vector3(0, 2.75f, 0);
+        isMoving = true; // ì´ë™ í™œì„±í™”
+        isReelMoving = true;
+        stepManager.WhenGrabbedObject();
+        //fallDownGuideHand.SetActive(false);
     }
     void StartLanding()
     {
         SoundManager.Instance.PlaySFX("Rope");
-        targetPosition = eye.transform.position + new Vector3(0, -10, 0); // ¸ñÇ¥ À§Ä¡ ¼³Á¤
-        isMoving = true; // ÀÌµ¿ È°¼ºÈ­
+        targetPosition = eye.transform.position + new Vector3(0, -10, 0); // ëª©í‘œ ìœ„ì¹˜ ì„¤ì •
+        isMoving = true; // ì´ë™ í™œì„±í™”
     }
 
 
+    bool IsHandUp(Transform transform)
+    {
+        if(transform.localPosition.y > 0.1f)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    void WhenLanding()
+    {
+        Destroy(fallDownGuideHand);
+        stepManager.OnPlayerActionCompleted();
+    }
 }

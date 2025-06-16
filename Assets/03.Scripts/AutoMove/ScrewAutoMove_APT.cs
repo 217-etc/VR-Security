@@ -16,7 +16,13 @@ public class ScrewAutoMove_APT : MonoBehaviour
     private Vector3 initialPosition; // 초기 위치 저장
     private float lastRotationY;
 
+    public Outline outline;
+    public GameObject gauge;
+    public GameObject guideHand;
+
     public ScrewGauge screwGauge;  // 새로운 스크류 게이지 시스템 추가
+    public GameObject supporterHandGrab1;
+    public GameObject supporterHandGrab2;
 
     // 반대회전막기
     public OneGrabRotateTransformer_APT transformerScript; // 인스펙터에서 연결
@@ -107,6 +113,13 @@ public class ScrewAutoMove_APT : MonoBehaviour
             SoundManager.Instance.PlaySFX("Link");
             isLocked = true;
             stepManager?.OnPlayerActionCompleted();
+
+            // 6. 아웃라인 끄기
+            outline.enabled = false;
+            guideHand.SetActive(false);
+            gauge.SetActive(false);
+            supporterHandGrab1.SetActive(true);
+            supporterHandGrab2.SetActive(true);
         }
     }
 

@@ -11,6 +11,9 @@ TagManager:
   - LocoText
   - Wall
   - Hole
+  - SupporterHole
+  - Head
+  - Hand
   layers:
   - Default
   - TransparentFX
