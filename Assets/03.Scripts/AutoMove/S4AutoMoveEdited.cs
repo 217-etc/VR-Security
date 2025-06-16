@@ -23,6 +23,8 @@ public class S4AutoMoveEdited : MonoBehaviour
     private bool S4Done = false;
     private bool S4setting = false;
 
+    public GameObject newSupporter;
+
     void Start()
     {
         //ActivateHandMoveObjects(); // 처음엔 그랩 활성화
@@ -65,7 +67,9 @@ public class S4AutoMoveEdited : MonoBehaviour
             StepUI.SetActive(true); // 수정: 스텝 UI 켜기
             S4Done = true;
             // stepManager.OnPlayerActionCompleted(); // 수정
-            stepManager.enabled = true; // 수정: 스텝매니저 다시 켜기
+            stepManager.gameObject.SetActive(true); // 수정: 스텝매니저 다시 켜기
+            newSupporter.SetActive(true); // 새로운 지지대 켜기
+            this.gameObject.SetActive(false);
         }
     }
 

@@ -38,6 +38,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/01.Scene/MDemoStage_FallDown.unity
     guid: 1537983ccb9bbab4799aaa6fe7b83630
+  - enabled: 1
+    path: Assets/01.Scene/MDemoStage_GoriBelt.unity
+    guid: e86384c722a50b8479f322a6e24cc468
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: ae5a232ed59bd0c4190f9b4669d2238b,
       type: 2}

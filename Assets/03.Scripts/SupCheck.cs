@@ -30,7 +30,7 @@ public class SupCheck : MonoBehaviour
             DialogueManager.Instance.StartDialogue("Dialogue_A004-01"); // 대사 출력
             HandMoveObject.SetActive(true);
             HandMoveObject_mirror.SetActive(true);
-            stepManager.enabled = false; // 스텝매니저 끄기
+            stepManager.gameObject.SetActive(false);
             StepUI.SetActive(false); // 체크 UI 켜기
             S2CKUI.SetActive(true); // 체크 UI 켜기
             outline2.enabled = true; // 아웃라인 켜기
